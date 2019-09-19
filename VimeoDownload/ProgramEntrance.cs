@@ -22,11 +22,11 @@
             }
             catch (AggregateException e)
             {
-                Console.WriteLine("Error: {0}", e.InnerException);
+                Console.WriteLine("Error: {0}", e.InnerException.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error: {0}", e);
+                Console.WriteLine("Error: {0}", e.Message);
             }
         }
     }
