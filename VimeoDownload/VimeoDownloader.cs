@@ -10,10 +10,6 @@
 
     public class VimeoDownloader
     {
-        private List<string> videoTempFileNames;
-
-        private List<string> audioTempFileNames;
-
         public string DownloadAddress { get; set; }
 
         public string OutputFilename { get; set; }
@@ -24,31 +20,47 @@
             {
                 Console.WriteLine("Downloading metadata...");
                 var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
-                Console.WriteLine($"The video has {videoInfo.Video.Count} video clip(s) and {videoInfo.Audio} audio clip(s).");
+                Console.WriteLine($"The video has {videoInfo.Video.Count} video clip(s) and {videoInfo.Audio.Count} audio clip(s).");
                 var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
                 Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
+                var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
                 Parallel.For(0, videoInfo.Video.Count,
                     new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                    async i =>
-                {
-                    await DownloadMediaClip(httpClient, videoInfo.Video[i], Path.Combine(tempDir.FullName, $"video{i}.m4v"), videoInfo.IsBase64Init);
-                });
+                    i =>
+                    {
+                        DownloadMediaClip(httpClient, videoInfo.Video[i], baseUrl, Path.Combine(tempDir.FullName, $"video{i}.m4v"), videoInfo.IsBase64Init).Wait();
+                    });
+                Parallel.For(0, videoInfo.Audio.Count,
+                    new ParallelOptions { MaxDegreeOfParallelism = 1 },
+                    i =>
+                    {
+                        DownloadMediaClip(httpClient, videoInfo.Audio[i], baseUrl, Path.Combine(tempDir.FullName, $"audio{i}.m4a"), videoInfo.IsBase64Init).Wait();
+                    });
             }
         }
 
-        private async Task DownloadMediaClip(HttpClient httpClient, MediaClip clipData, string outputFile, bool isBase64Init)
+        private async Task DownloadMediaClip(HttpClient httpClient, MediaClip clipData, string baseUrl, string outputFile, bool isBase64Init)
         {
             using (var fileStream = File.Create(outputFile))
             {
-                var fsOffset = 0;
                 if (isBase64Init)
                 {
+                    Console.WriteLine($"Writing initialize segment into {outputFile}");
                     var initSegment = Convert.FromBase64String(clipData.InitSegment);
-                    fileStream.Write(initSegment, fsOffset, initSegment.Length);
-                    foreach(var segment in clipData.Segments)
-                    {
-                        
-                    }
+                    fileStream.Write(initSegment, 0, initSegment.Length);
+                }
+                else
+                {
+                    var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, clipData.InitSegment);
+                    Console.WriteLine($"Downloading {url}");
+                    await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream);
+                }
+
+                foreach (var segment in clipData.Segments)
+                {
+                    var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
+                    Console.WriteLine($"Downloading {url}");
+                    await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream);
                 }
             }
         }
