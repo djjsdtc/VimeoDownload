@@ -4,38 +4,41 @@
     using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Flurl;
     using Newtonsoft.Json;
     using VimeoDownload.DataContract;
 
     public static class WebUtility
     {
-        public static async Task<VimeoVideo> GetVideoInfo(string url)
+        public static async Task<VimeoVideo> GetVideoInfo(HttpClient httpClient, string url)
         {
-            using (var httpClient = new HttpClient())
+            var response = await httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
             {
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
-                }
-
-                var json = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<VimeoVideo>(json);
+                throw new Exception($"Request {url} gets error code {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
+            result.IsBase64Init = IsBase64InitSegment(url);
+            return result;
         }
 
-        public static async Task DownloadContentIntoStream(string url, FileStream fileStream)
+        public static async Task DownloadContentIntoStream(HttpClient httpClient, string url, FileStream fileStream)
         {
-            using (var httpClient = new HttpClient())
+            var response = await httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
             {
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
-                }
-
-                await response.Content.CopyToAsync(fileStream);
+                throw new Exception($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
             }
+
+            await response.Content.CopyToAsync(fileStream);
+        }
+
+        public static bool IsBase64InitSegment(string url)
+        {
+            var base64Init = int.TryParse(new Url(url).QueryParams["base64_init"]?.ToString(), out var i) ? i : 0;
+            return base64Init == 1;
         }
 
         public static string CombimeUrl(string baseUrl, params string[] relativeUrls)

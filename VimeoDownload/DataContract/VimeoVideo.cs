@@ -16,5 +16,10 @@
 
         [JsonProperty("audio")]
         public IList<AudioClip> Audio { get; set; }
+
+        [JsonIgnore]
+        public bool IsBase64Init { get; set; }
+
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }
