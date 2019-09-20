@@ -5,7 +5,7 @@
     <TargetFramework>net461</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AssemblyTitle>VimeoDownload.Wrapper.Windows</AssemblyTitle>
-    <Product>VimeoDownload.Wrapper.Windows1</Product>
+    <Product>VimeoDownload.Wrapper.Windows</Product>
     <Copyright></Copyright>
     <PackageId>VimeoDownload.Wrapper.Windows</PackageId>
     <Authors>Cookie Studio</Authors>
