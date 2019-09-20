@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using CommandLine;
+    using VimeoDownload.VideoMerge;
 
     public static class ProgramEntrance
     {
@@ -14,27 +15,31 @@
 
         public static async Task Run(CommandLineOption option)
         {
-            var vimeoDownloader = new VimeoDownloader();
-            vimeoDownloader.DownloadAddress = option.DownloadAddress;
+            using (var vimeoDownloader = new VimeoDownloader())
+            {
+                vimeoDownloader.DownloadAddress = option.DownloadAddress;
             
-            try
-            {
-                if (option.Download)
+                try
                 {
-                    await vimeoDownloader.DownloadVideo();
+                    if (option.Download)
+                    {
+                        vimeoDownloader.OutputFilename = option.OutputFileName;
+                        vimeoDownloader.VideoMerger = new MkvMergeVideoMerger();
+                        await vimeoDownloader.DownloadVideo();
+                    }
+                    else if (option.ListFormats)
+                    {
+                        await vimeoDownloader.ShowMediaInfo();
+                    }
                 }
-                else if (option.ListFormats)
+                catch (AggregateException e)
                 {
-                    await vimeoDownloader.ShowMediaInfo();
+                    Console.WriteLine("Error: {0}", e.InnerException.Message);
                 }
-            }
-            catch (AggregateException e)
-            {
-                Console.WriteLine("Error: {0}", e.InnerException.Message);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error: {0}", e.Message);
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: {0}", e.Message);
+                }
             }
         }
     }

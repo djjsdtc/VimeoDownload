@@ -7,12 +7,15 @@
     using System.Net.Http;
     using System.Threading.Tasks;
     using VimeoDownload.DataContract;
+    using VimeoDownload.VideoMerge;
 
     public class VimeoDownloader : IDisposable
     {
         public string DownloadAddress { get; set; }
 
         public string OutputFilename { get; set; }
+
+        public VideoMerger VideoMerger { get; set; }
 
         private HttpClient httpClient = new HttpClient();
 
@@ -43,8 +46,21 @@
             var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
             Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
             var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
-            await DownloadMediaClip(httpClient, videoInfo.Video.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v"), videoInfo.IsBase64Init);
-            await DownloadMediaClip(httpClient, videoInfo.Audio.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a"), videoInfo.IsBase64Init);
+            var videoFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v");
+            var audioFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a");
+            await DownloadMediaClip(httpClient, videoInfo.Video.First(), baseUrl, videoFile, videoInfo.IsBase64Init);
+            await DownloadMediaClip(httpClient, videoInfo.Audio.First(), baseUrl, audioFile, videoInfo.IsBase64Init);
+            var mergeResult = VideoMerger.MergeVideo(videoFile, audioFile, this.OutputFilename);
+            if (mergeResult == 0)
+            {
+                File.Delete(videoFile);
+                File.Delete(audioFile);
+                tempDir.Delete();
+            }
+            else
+            {
+                throw new Exception($"Error occurred when merging files, the exit code is {mergeResult}");
+            }
         }
 
         private async Task DownloadMediaClip(HttpClient httpClient, MediaClip clipData, string baseUrl, string outputFile, bool isBase64Init)
