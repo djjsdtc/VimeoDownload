@@ -16,9 +16,17 @@
         {
             var vimeoDownloader = new VimeoDownloader();
             vimeoDownloader.DownloadAddress = option.DownloadAddress;
+            
             try
             {
-                await vimeoDownloader.DownloadVideo();
+                if (option.Download)
+                {
+                    await vimeoDownloader.DownloadVideo();
+                }
+                else if (option.ListFormats)
+                {
+                    await vimeoDownloader.ShowMediaInfo();
+                }
             }
             catch (AggregateException e)
             {

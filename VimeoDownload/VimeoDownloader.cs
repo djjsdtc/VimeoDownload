@@ -8,24 +8,43 @@
     using System.Threading.Tasks;
     using VimeoDownload.DataContract;
 
-    public class VimeoDownloader
+    public class VimeoDownloader : IDisposable
     {
         public string DownloadAddress { get; set; }
 
         public string OutputFilename { get; set; }
 
+        private HttpClient httpClient = new HttpClient();
+
+        public async Task ShowMediaInfo()
+        {
+            Console.WriteLine("Downloading metadata...");
+            var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
+            Console.WriteLine("Available video formats:");
+            Console.WriteLine("clip id\t\tcodec\tresolution\tframerate");
+            foreach (var video in videoInfo.Video)
+            {
+                Console.WriteLine($"{video.Id}\t{video.Codecs.Split('.')[0]}\t{video.Width}x{video.Height}\t\t{video.Framerate:0.###}fps");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Available audio formats:");
+            Console.WriteLine("clip id\t\tcodec\tbitrate");
+            foreach (var audio in videoInfo.Audio)
+            {
+                Console.WriteLine($"{audio.Id}\t{audio.Codecs.Split('.')[0]}\t{audio.Bitrate}");
+            }
+        }
+
         public async Task DownloadVideo()
         {
-            using (var httpClient = new HttpClient())
-            {
-                Console.WriteLine("Downloading metadata...");
-                var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
-                var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
-                Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
-                var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
-                await DownloadMediaClip(httpClient, videoInfo.Video.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v"), videoInfo.IsBase64Init);
-                await DownloadMediaClip(httpClient, videoInfo.Audio.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a"), videoInfo.IsBase64Init);
-            }
+            Console.WriteLine("Downloading metadata...");
+            var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
+            var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
+            Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
+            var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
+            await DownloadMediaClip(httpClient, videoInfo.Video.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v"), videoInfo.IsBase64Init);
+            await DownloadMediaClip(httpClient, videoInfo.Audio.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a"), videoInfo.IsBase64Init);
         }
 
         private async Task DownloadMediaClip(HttpClient httpClient, MediaClip clipData, string baseUrl, string outputFile, bool isBase64Init)
@@ -49,7 +68,7 @@
                 var tempDirectory = Directory.CreateDirectory(tempPath);
 
                 Parallel.ForEach(clipData.Segments,
-                    new ParallelOptions{MaxDegreeOfParallelism = 4},
+                    new ParallelOptions { MaxDegreeOfParallelism = 4 },
                     segment =>
                 {
                     using (var tempFile = File.Create(Path.Combine(tempDirectory.FullName, segment.Url)))
@@ -74,6 +93,12 @@
 
                 tempDirectory.Delete();
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            httpClient?.Dispose();
         }
     }
 }

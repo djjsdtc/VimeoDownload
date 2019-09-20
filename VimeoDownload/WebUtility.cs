@@ -22,7 +22,7 @@
             var json = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
             result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
-            result.Video = result.Video.OrderByDescending(x => x.Height).ToList();
+            result.Video = result.Video.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList();
             result.IsBase64Init = IsBase64InitSegment(url);
             return result;
         }
