@@ -4,11 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net461</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <AssemblyTitle>VimeoDownload.Wrapper.Windows</AssemblyTitle>
-    <Product>VimeoDownload.Wrapper.Windows</Product>
-    <Copyright></Copyright>
-    <PackageId>VimeoDownload.Wrapper.Windows</PackageId>
+    <AssemblyTitle>VimeoDownloader</AssemblyTitle>
+    <Product>VimeoDownloader</Product>
+    <Copyright>Copyright (C) 2019 Cookie Studio. All rights reserved.</Copyright>
+    <PackageId>VimeoDownloader</PackageId>
     <Authors>Cookie Studio</Authors>
+    <AssemblyName>VimeoDownloader</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.*" />
