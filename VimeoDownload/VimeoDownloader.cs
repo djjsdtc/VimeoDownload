@@ -17,6 +17,10 @@
 
         public VideoMerger VideoMerger { get; set; }
 
+        public string VideoFormatId { get; set; }
+
+        public string AudioFormatId { get; set; }
+
         private HttpClient httpClient = new HttpClient();
 
         public async Task ShowMediaInfo()
@@ -43,19 +47,42 @@
         {
             Console.WriteLine("Downloading metadata...");
             var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
+
             var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
             Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
+
             var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
             var videoFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v");
             var audioFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a");
-            await DownloadMediaClip(httpClient, videoInfo.Video.First(), baseUrl, videoFile, videoInfo.IsBase64Init);
-            await DownloadMediaClip(httpClient, videoInfo.Audio.First(), baseUrl, audioFile, videoInfo.IsBase64Init);
+
+            var video = videoInfo.Video.FirstOrDefault(x => string.Equals(x.Id, this.VideoFormatId));
+            if (video == null)
+            {
+                Console.WriteLine("Video format not defined or wrong, use best quality instead.");
+                video = videoInfo.Video.First();
+            }
+            var audio = videoInfo.Audio.FirstOrDefault(x => string.Equals(x.Id, this.AudioFormatId));
+            if (audio == null)
+            {
+                Console.WriteLine("Audio format not defined or wrong, use best quality instead.");
+                audio = videoInfo.Audio.First();
+            }
+
+            await DownloadMediaClip(httpClient, video, baseUrl, videoFile, videoInfo.IsBase64Init);
+            await DownloadMediaClip(httpClient, audio, baseUrl, audioFile, videoInfo.IsBase64Init);
             var mergeResult = VideoMerger.MergeVideo(videoFile, audioFile, this.OutputFilename);
             if (mergeResult == 0)
             {
                 File.Delete(videoFile);
                 File.Delete(audioFile);
-                tempDir.Delete();
+                try
+                {
+                    tempDir.Delete();
+                }
+                catch
+                {
+                    Console.WriteLine($"Cannot delete temporary storage {tempDir.FullName}, you can manually remove it.");
+                }
             }
             else
             {
