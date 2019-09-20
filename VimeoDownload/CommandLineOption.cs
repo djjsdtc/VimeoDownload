@@ -60,8 +60,16 @@
             Required = false)]
         public string AudioFormatId { get; set; }
 
-        [Option("threads",
+        [Option('t', "threads",
             HelpText = "Define the download thread's number.", Default = 4)]
         public int ThreadNumber { get; set; }
+
+        [Option("proxy",
+            HelpText = "Define the proxy to be used for download. You can use 'none', 'system' or url formatted proxy definition.\n" +
+                       "Currently supported proxy types are 'http' and 'socks'(SOCKS v5).\n" +
+                       "If not defined or use 'system', the environment variable or system setting will be applied.\n" +
+                       "If 'none' is defined, the system proxy will be bypassed.",
+            Default = "system")]
+        public string Proxy { get; set; }
     }
 }

@@ -339,3 +339,4 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /VimeoDownload.Wrapper.Core/Properties/launchSettings.json
+/VimeoDownload.Wrapper.Windows/Properties/launchSettings.json

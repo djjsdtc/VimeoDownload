@@ -26,7 +26,12 @@
 
         public int ThreadNumber { get; set; }
 
-        private HttpClient httpClient = new HttpClient();
+        private HttpClient httpClient;
+
+        public VimeoDownloader(HttpClientHandler httpClientHandler)
+        {
+            this.httpClient = new HttpClient(httpClientHandler);
+        }
 
         public async Task ShowMediaInfo()
         {

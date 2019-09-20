@@ -1,8 +1,11 @@
 ﻿namespace VimeoDownload
 {
     using System;
+    using System.Net;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using CommandLine;
+    using MihaZupan;
     using VimeoDownload.VideoMerge;
 
     public static class ProgramEntrance
@@ -15,7 +18,12 @@
 
         public static async Task Run(CommandLineOption option)
         {
-            using (var vimeoDownloader = new VimeoDownloader())
+            if (option.ThreadNumber < 1)
+            {
+                throw new Exception("Invalid thread number.");
+            }
+
+            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy)))
             {
                 vimeoDownloader.DownloadAddress = option.DownloadAddress;
             
@@ -28,6 +36,7 @@
                         vimeoDownloader.VideoFormatId = option.VideoFormatId;
                         vimeoDownloader.OverrideOutput = option.OverrideOutput;
                         vimeoDownloader.NotOverrideOutput = option.NotOverrideOutput;
+                        vimeoDownloader.ThreadNumber = option.ThreadNumber;
 
                         if (!option.NoMerge)
                         {
@@ -59,8 +68,55 @@
                 case "mkvmerge":
                     return new MkvMergeVideoMerger();
                 case "ffmpeg":
+                    break;
                 default:
-                    return new FFmpegVideoMerger();
+                    Console.WriteLine($"Invalid video merger '{mergerName}', ffmpeg will be used.");
+                    break;
+            }
+
+            return new FFmpegVideoMerger();
+        }
+
+        public static HttpClientHandler GetProxyHandler(string proxySetting)
+        {
+            if (proxySetting.ToLower() == "none")
+            {
+                return new HttpClientHandler {UseProxy = false};
+            }
+            else if (proxySetting.ToLower() == "system")
+            {
+                return new HttpClientHandler {UseProxy = true};
+            }
+            else
+            {
+                try
+                {
+                    var uri = new Uri(proxySetting);
+                    if (uri.Scheme.ToLower() == "http")
+                    {
+                        return new HttpClientHandler
+                        {
+                            UseProxy = true,
+                            Proxy = new WebProxy(uri.Host, uri.Port)
+                        };
+                    }
+                    else if (uri.Scheme.ToLower() == "socks")
+                    {
+                        return new HttpClientHandler
+                        {
+                            UseProxy = true,
+                            Proxy = new HttpToSocks5Proxy(uri.Host, uri.Port)
+                        };
+                    }
+                    else
+                    {
+                        throw new UriFormatException();
+                    }
+                }
+                catch (UriFormatException)
+                {
+                    throw new Exception($"Invalid proxy setting {proxySetting}");
+                }
             }
         }
     }
