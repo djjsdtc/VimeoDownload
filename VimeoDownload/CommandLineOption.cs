@@ -2,7 +2,10 @@
 {
     using CommandLine;
 
-    public class CommandLineOption
+    /// <summary>
+    /// 命令行选项。
+    /// </summary>
+    public partial class CommandLineOption
     {
         /// <summary>
         /// master.json 的文件地址。
@@ -60,7 +63,7 @@
         /// 如果为 <see langword="true" />，则输出文件已存在时将覆盖。此时会忽略 <see cref="NotOverrideOutput" />。
         /// </summary>
         [Option("override",
-            HelpText = "Override the output file if exists.\n" +
+            HelpText = "Override the output and temporary file if exists.\n" +
                        "If this option is defined, '--no-override' will be ignored.",
             Required = false)]
         public bool OverrideOutput { get; set; }
@@ -70,7 +73,7 @@
         /// 如果 <see cref="OverrideOutput" /> 和 <see cref="NotOverrideOutput" /> 均为 <see langword="false" />，则会在控制台询问用户是否覆盖文件。
         /// </summary>
         [Option("no-override",
-            HelpText = "Do not override the output file if exists.\n" +
+            HelpText = "Do not override the output and temporary file if exists.\n" +
                        "If neither '--override' nor '--no-override' is defined and the output file exists, the program will ask if user would override the file or not.",
             Required = false)]
         public bool NotOverrideOutput { get; set; }

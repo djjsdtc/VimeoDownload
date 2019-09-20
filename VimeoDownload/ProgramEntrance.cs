@@ -18,21 +18,22 @@
         /// 程序总入口。请注意虽然方法名为 Main，但本项目为 .NET Standard 项目，不能直接调用。
         /// 需要从 .NET Core 或 .NET Framework 封装程序处调用该方法。
         /// </summary>
+        /// <typeparam name="T"><see cref="CommandLineOption" /> 的各平台重载。</typeparam>
         /// <param name="args">命令行参数。</param>
-        public static void Main(string[] args)
+        public static void Main<T>(string[] args) where T : CommandLineOption
         {
             try
             {
-                Parser.Default.ParseArguments<CommandLineOption>(args)
+                Parser.Default.ParseArguments<T>(args)
                     .WithParsed(option => Run(option).Wait());
             }
             catch (AggregateException e)
             {
-                Console.WriteLine("Error: {0}", e.InnerException.Message);
+                Console.WriteLine("Error: {0}", e.InnerException);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error: {0}", e.Message);
+                Console.WriteLine("Error: {0}", e);
             }
         }
 
@@ -81,11 +82,11 @@
                 }
                 catch (AggregateException e)
                 {
-                    Console.WriteLine("Error: {0}", e.InnerException.Message);
+                    Console.WriteLine("Error: {0}", e.InnerException);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error: {0}", e.Message);
+                    Console.WriteLine("Error: {0}", e);
                 }
             }
         }

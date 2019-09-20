@@ -11,7 +11,7 @@
         /// <param name="args">命令行参数。</param>
         static void Main(string[] args)
         {
-            ProgramEntrance.Main(args);
+            ProgramEntrance.Main<WinCommandLineOption>(args);
         }
     }
 }
