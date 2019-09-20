@@ -13,8 +13,19 @@
     {
         public static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<CommandLineOption>(args)
-                .WithParsed(option => Run(option).Wait());
+            try
+            {
+                Parser.Default.ParseArguments<CommandLineOption>(args)
+                    .WithParsed(option => Run(option).Wait());
+            }
+            catch (AggregateException e)
+            {
+                Console.WriteLine("Error: {0}", e.InnerException.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: {0}", e.Message);
+            }
         }
 
         public static async Task Run(CommandLineOption option)
@@ -22,6 +33,11 @@
             if (option.ThreadNumber < 1)
             {
                 throw new Exception("Invalid thread number.");
+            }
+
+            if (!option.Download && !option.ListFormats)
+            {
+                throw new Exception("One of '--download' and '--list-formats' must be defined.");
             }
 
             using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy)))
@@ -53,11 +69,11 @@
                 }
                 catch (AggregateException e)
                 {
-                    Console.WriteLine("Error: {0}", e.InnerException);
+                    Console.WriteLine("Error: {0}", e.InnerException.Message);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error: {0}", e);
+                    Console.WriteLine("Error: {0}", e.Message);
                 }
             }
         }
