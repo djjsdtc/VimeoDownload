@@ -5,8 +5,10 @@
     <TargetFramework>net461</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <AssemblyTitle>VimeoDownload.Wrapper.Windows</AssemblyTitle>
-    <Product>VimeoDownload.Wrapper.Windows</Product>
-    <Copyright>Copyright ©  2019</Copyright>
+    <Product>VimeoDownload.Wrapper.Windows1</Product>
+    <Copyright></Copyright>
+    <PackageId>VimeoDownload.Wrapper.Windows</PackageId>
+    <Authors>Cookie Studio</Authors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.*" />
