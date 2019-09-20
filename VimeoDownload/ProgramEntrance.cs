@@ -26,6 +26,9 @@
                         vimeoDownloader.OutputFilename = option.OutputFileName;
                         vimeoDownloader.AudioFormatId = option.AudioFormatId;
                         vimeoDownloader.VideoFormatId = option.VideoFormatId;
+                        vimeoDownloader.OverrideOutput = option.OverrideOutput;
+                        vimeoDownloader.NotOverrideOutput = option.NotOverrideOutput;
+
                         if (!option.NoMerge)
                         {
                             vimeoDownloader.VideoMerger = GetVideoMerger(option.MergerName);

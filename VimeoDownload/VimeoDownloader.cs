@@ -1,7 +1,6 @@
 ﻿namespace VimeoDownload
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
@@ -14,6 +13,10 @@
         public string DownloadAddress { get; set; }
 
         public string OutputFilename { get; set; }
+
+        public bool OverrideOutput { get; set; }
+
+        public bool NotOverrideOutput { get; set; }
 
         public VideoMerger VideoMerger { get; set; }
 
@@ -45,6 +48,10 @@
 
         public async Task DownloadVideo()
         {
+            if (VideoMerger != null && !ShouldCreateFile(OutputFilename))
+            {
+                return;
+            }
             Console.WriteLine("Downloading metadata...");
             var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
 
@@ -52,24 +59,36 @@
             Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
 
             var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
+
+            bool isVideoFileCreated = false;
             var videoFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v");
+            if (ShouldCreateFile(videoFile))
+            {
+                isVideoFileCreated = true;
+                var video = videoInfo.Video.FirstOrDefault(x => string.Equals(x.Id, this.VideoFormatId));
+                if (video == null)
+                {
+                    Console.WriteLine("Video format not defined or wrong, use best quality instead.");
+                    video = videoInfo.Video.First();
+                }
+
+                await DownloadMediaClip(httpClient, video, baseUrl, videoFile, videoInfo.IsBase64Init);
+            }
+
+            bool isAudioFileCreated = false;
             var audioFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a");
-
-            var video = videoInfo.Video.FirstOrDefault(x => string.Equals(x.Id, this.VideoFormatId));
-            if (video == null)
+            if (ShouldCreateFile(audioFile))
             {
-                Console.WriteLine("Video format not defined or wrong, use best quality instead.");
-                video = videoInfo.Video.First();
-            }
-            var audio = videoInfo.Audio.FirstOrDefault(x => string.Equals(x.Id, this.AudioFormatId));
-            if (audio == null)
-            {
-                Console.WriteLine("Audio format not defined or wrong, use best quality instead.");
-                audio = videoInfo.Audio.First();
-            }
+                isAudioFileCreated = true;
+                var audio = videoInfo.Audio.FirstOrDefault(x => string.Equals(x.Id, this.AudioFormatId));
+                if (audio == null)
+                {
+                    Console.WriteLine("Audio format not defined or wrong, use best quality instead.");
+                    audio = videoInfo.Audio.First();
+                }
 
-            await DownloadMediaClip(httpClient, video, baseUrl, videoFile, videoInfo.IsBase64Init);
-            await DownloadMediaClip(httpClient, audio, baseUrl, audioFile, videoInfo.IsBase64Init);
+                await DownloadMediaClip(httpClient, audio, baseUrl, audioFile, videoInfo.IsBase64Init);
+            }
 
             if (VideoMerger == null)
             {
@@ -80,16 +99,17 @@
                 var mergeResult = VideoMerger.MergeVideo(videoFile, audioFile, this.OutputFilename);
                 if (mergeResult == 0)
                 {
-                    File.Delete(videoFile);
-                    File.Delete(audioFile);
-                    try
+                    if (isVideoFileCreated)
                     {
-                        tempDir.Delete();
+                        TryDelete(videoFile);
                     }
-                    catch
+
+                    if (isAudioFileCreated)
                     {
-                        Console.WriteLine($"Cannot delete temporary storage {tempDir.FullName}, you can manually remove it.");
+                        TryDelete(audioFile);
                     }
+
+                    TryDelete(tempDir);
                 }
                 else
                 {
@@ -139,10 +159,72 @@
                         tempFile.CopyTo(fileStream);
                     }
 
-                    File.Delete(tempFileName);
+                    TryDelete(tempFileName);
                 }
 
-                tempDirectory.Delete();
+                TryDelete(tempDirectory);
+            }
+        }
+
+        private bool ShouldCreateFile(string fileName)
+        {
+            if (this.OverrideOutput)
+            {
+                Console.WriteLine("The file will be overwritten.");
+                return true;
+            }
+
+            if (File.Exists(fileName))
+            {
+                Console.Write($"File {Path.GetFileName(fileName)} already exists. ");
+                if (this.NotOverrideOutput)
+                {
+                    Console.WriteLine("The file will not be overwritten.");
+                    return false;
+                }
+
+                Console.Write($"Override? (y/n): ");
+                while (true)
+                {
+                    var result = Console.ReadKey().KeyChar;
+                    Console.WriteLine();
+                    if (result == 'Y' || result == 'y')
+                    {
+                        return true;
+                    }
+                    else if (result == 'N' || result == 'n')
+                    {
+                        return false;
+                    }
+
+                    Console.Write("Invalid response. Please enter 'y' or 'n': ");
+                }
+            }
+
+            return true;
+        }
+
+        private void TryDelete(string fileName)
+        {
+            try
+            {
+                File.Delete(fileName);
+            }
+            catch
+            {
+                Console.WriteLine($"Cannot delete temporary storage {Path.GetFileName(fileName)}, you can manually remove it.");
+            }
+        }
+
+        private void TryDelete(DirectoryInfo directory)
+        {
+            try
+            {
+                directory.Delete();
+            }
+            catch
+            {
+                Console.WriteLine($"Cannot delete temporary storage {directory.FullName}, you can manually remove it.");
             }
         }
 
