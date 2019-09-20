@@ -24,6 +24,8 @@
 
         public string AudioFormatId { get; set; }
 
+        public int ThreadNumber { get; set; }
+
         private HttpClient httpClient = new HttpClient();
 
         public async Task ShowMediaInfo()
@@ -139,7 +141,7 @@
                 var tempDirectory = Directory.CreateDirectory(tempPath);
 
                 Parallel.ForEach(clipData.Segments,
-                    new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                    new ParallelOptions { MaxDegreeOfParallelism = this.ThreadNumber },
                     segment =>
                 {
                     using (var tempFile = File.Create(Path.Combine(tempDirectory.FullName, segment.Url)))

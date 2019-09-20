@@ -59,5 +59,9 @@
                        "If not defined or given a wrong value, the highest quality format will be downloaded.",
             Required = false)]
         public string AudioFormatId { get; set; }
+
+        [Option("threads",
+            HelpText = "Define the download thread's number.", Default = 4)]
+        public int ThreadNumber { get; set; }
     }
 }
