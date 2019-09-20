@@ -8,36 +8,75 @@
     using VimeoDownload.DataContract;
     using VimeoDownload.VideoMerge;
 
+    /// <summary>
+    /// 下载的主要逻辑实现。
+    /// </summary>
     public class VimeoDownloader : IDisposable
     {
+        /// <summary>
+        /// master.json 的文件地址。
+        /// </summary>
         public string DownloadAddress { get; set; }
 
+        /// <summary>
+        /// 输出文件名。
+        /// </summary>
         public string OutputFilename { get; set; }
 
+        /// <summary>
+        /// 如果为 <see langword="true" />，则输出文件已存在时将覆盖。此时会忽略 <see cref="NotOverrideOutput" />。
+        /// </summary>
         public bool OverrideOutput { get; set; }
 
+        /// <summary>
+        /// 如果为 <see langword="true" />，则输出文件已存在时将跳过。
+        /// 如果 <see cref="OverrideOutput" /> 和 <see cref="NotOverrideOutput" /> 均为 <see langword="false" />，则会在控制台询问用户是否覆盖文件。
+        /// </summary>
         public bool NotOverrideOutput { get; set; }
 
+        /// <summary>
+        /// 外部视频合并程序。如果为 <see langword="null" />，则不合并音视频。
+        /// </summary>
         public VideoMerger VideoMerger { get; set; }
 
+        /// <summary>
+        /// 视频格式 ID。如果为 <see langword="null" />，则取最高画质。
+        /// </summary>
         public string VideoFormatId { get; set; }
 
+        /// <summary>
+        /// 音频格式 ID。如果为 <see langword="null" />，则取最高音质。
+        /// </summary>
         public string AudioFormatId { get; set; }
 
+        /// <summary>
+        /// 同时下载的线程数。
+        /// </summary>
         public int ThreadNumber { get; set; }
 
+        /// <summary>
+        /// HTTP 客户端。
+        /// </summary>
         private readonly HttpClient httpClient;
 
+        /// <summary>
+        /// 构造函数。
+        /// </summary>
+        /// <param name="httpClientHandler">带代理设置的 <see cref="HttpClientHandler" />。</param>
         public VimeoDownloader(HttpClientHandler httpClientHandler)
         {
             this.httpClient = new HttpClient(httpClientHandler);
         }
 
+        /// <summary>
+        /// 显示音视频格式列表。
+        /// </summary>
         public async Task ShowMediaInfo()
         {
             Console.WriteLine("Downloading metadata...");
             var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
             Console.WriteLine($"Video length: {TimeSpan.FromSeconds(videoInfo.Video[0].Duration).ToString()}");
+
             Console.WriteLine("Available video formats:");
             Console.WriteLine("{0,-15}{1,-8}{2,-15}{3}", "clip id", "codec", "resolution", "framerate");
             foreach (var video in videoInfo.Video)
@@ -54,6 +93,9 @@
             }
         }
 
+        /// <summary>
+        /// 下载视频。
+        /// </summary>
         public async Task DownloadVideo()
         {
             if (VideoMerger != null && !ShouldCreateFile(OutputFilename))
@@ -105,15 +147,17 @@
             else
             {
                 var mergeResult = VideoMerger.MergeVideo(videoFile, audioFile, this.OutputFilename);
-                if (mergeResult == 0)
+                if (mergeResult == 0)   // 外部程序返回 0 表示正常退出。
                 {
                     if (isVideoFileCreated)
                     {
+                        // 如果 videoFile 不是本次运行创建的则不应删除。
                         TryDelete(videoFile);
                     }
 
                     if (isAudioFileCreated)
                     {
+                        // 如果 audioFile 不是本次运行创建的则不应删除。
                         TryDelete(audioFile);
                     }
 
@@ -126,6 +170,14 @@
             }
         }
 
+        /// <summary>
+        /// 下载音频/视频文件。
+        /// </summary>
+        /// <param name="httpClient">HTTP 客户端。</param>
+        /// <param name="clipData">文件元数据。</param>
+        /// <param name="baseUrl">文件的根路径。</param>
+        /// <param name="outputFile">输出文件名。</param>
+        /// <param name="isBase64Init">指示音频和视频文件的起始分段表示为 Base64 还是文件路径。</param>
         private async Task DownloadMediaClip(HttpClient httpClient, MediaClip clipData, string baseUrl, string outputFile, bool isBase64Init)
         {
             using (var fileStream = File.Create(outputFile))
@@ -143,6 +195,7 @@
                     await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream);
                 }
 
+                // segments 存放在系统的临时文件夹中，且始终覆盖。
                 var tempPath = Path.Combine(Path.GetTempPath(), $"{clipData.Id}.{clipData.Codecs}");
                 var tempDirectory = Directory.CreateDirectory(tempPath);
 
@@ -174,17 +227,22 @@
             }
         }
 
+        /// <summary>
+        /// 确定是否应该创建新文件。如果文件不存在或文件存在且允许覆盖，则返回 <see langword="true" />。
+        /// </summary>
+        /// <param name="fileName">文件名。</param>
+        /// <returns>如果允许创建新文件，则返回 <see langword="true" />。</returns>
         private bool ShouldCreateFile(string fileName)
         {
-            if (this.OverrideOutput)
-            {
-                Console.WriteLine("The file will be overwritten.");
-                return true;
-            }
-
             if (File.Exists(fileName))
             {
                 Console.Write($"File {Path.GetFileName(fileName)} already exists. ");
+
+                if (this.OverrideOutput)
+                {
+                    Console.WriteLine("The file will be overwritten.");
+                    return true;
+                }
                 if (this.NotOverrideOutput)
                 {
                     Console.WriteLine("The file will not be overwritten.");
@@ -212,6 +270,10 @@
             return true;
         }
 
+        /// <summary>
+        /// 删除文件，如删除失败则提示用户手动删除。
+        /// </summary>
+        /// <param name="fileName">文件名。</param>
         private void TryDelete(string fileName)
         {
             try
@@ -224,6 +286,10 @@
             }
         }
 
+        /// <summary>
+        /// 删除目录，如删除失败则提示用户手动删除。
+        /// </summary>
+        /// <param name="directory">要删除的目录对象。</param>
         private void TryDelete(DirectoryInfo directory)
         {
             try

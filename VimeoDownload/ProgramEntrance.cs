@@ -9,8 +9,16 @@
     using VimeoDownload.VideoMerge;
     using VimeoDownload.Web;
 
+    /// <summary>
+    /// 程序总入口。
+    /// </summary>
     public static class ProgramEntrance
     {
+        /// <summary>
+        /// 程序总入口。请注意虽然方法名为 Main，但本项目为 .NET Standard 项目，不能直接调用。
+        /// 需要从 .NET Core 或 .NET Framework 封装程序处调用该方法。
+        /// </summary>
+        /// <param name="args">命令行参数。</param>
         public static void Main(string[] args)
         {
             try
@@ -28,6 +36,10 @@
             }
         }
 
+        /// <summary>
+        /// 执行程序。
+        /// </summary>
+        /// <param name="option">解析后的命令行参数。</param>
         public static async Task Run(CommandLineOption option)
         {
             if (option.ThreadNumber < 1)
@@ -78,6 +90,11 @@
             }
         }
 
+        /// <summary>
+        /// 根据给定的合并器名称获取外部视频合并器的实现。
+        /// </summary>
+        /// <param name="mergerName">合并器名称。</param>
+        /// <returns>合并器实现。如果名称不存在则返回 ffmpeg 合并器。</returns>
         public static VideoMerger GetVideoMerger(string mergerName)
         {
             switch (mergerName.ToLower())
@@ -94,6 +111,12 @@
             return new FFmpegVideoMerger();
         }
 
+        /// <summary>
+        /// 根据给定的代理服务器设置返回对应的 <see cref="HttpClientHandler"/>。
+        /// </summary>
+        /// <param name="proxySetting">代理服务器设置。</param>
+        /// <returns>对应的 <see cref="HttpClientHandler"/>。</returns>
+        /// <exception cref="Exception">如果代理服务器设置有误或不支持则抛出异常。</exception>
         public static HttpClientHandler GetProxyHandler(string proxySetting)
         {
             if (proxySetting.ToLower() == "none")
