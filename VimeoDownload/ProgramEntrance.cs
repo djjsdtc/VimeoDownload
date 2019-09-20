@@ -26,7 +26,10 @@
                         vimeoDownloader.OutputFilename = option.OutputFileName;
                         vimeoDownloader.AudioFormatId = option.AudioFormatId;
                         vimeoDownloader.VideoFormatId = option.VideoFormatId;
-                        vimeoDownloader.VideoMerger = new MkvMergeVideoMerger();
+                        if (!option.NoMerge)
+                        {
+                            vimeoDownloader.VideoMerger = GetVideoMerger(option.MergerName);
+                        }
 
                         await vimeoDownloader.DownloadVideo();
                     }
@@ -43,6 +46,18 @@
                 {
                     Console.WriteLine("Error: {0}", e);
                 }
+            }
+        }
+
+        public static VideoMerger GetVideoMerger(string mergerName)
+        {
+            switch (mergerName.ToLower())
+            {
+                case "mkvmerge":
+                    return new MkvMergeVideoMerger();
+                case "ffmpeg":
+                default:
+                    return new FFmpegVideoMerger();
             }
         }
     }

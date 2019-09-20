@@ -70,23 +70,31 @@
 
             await DownloadMediaClip(httpClient, video, baseUrl, videoFile, videoInfo.IsBase64Init);
             await DownloadMediaClip(httpClient, audio, baseUrl, audioFile, videoInfo.IsBase64Init);
-            var mergeResult = VideoMerger.MergeVideo(videoFile, audioFile, this.OutputFilename);
-            if (mergeResult == 0)
+
+            if (VideoMerger == null)
             {
-                File.Delete(videoFile);
-                File.Delete(audioFile);
-                try
-                {
-                    tempDir.Delete();
-                }
-                catch
-                {
-                    Console.WriteLine($"Cannot delete temporary storage {tempDir.FullName}, you can manually remove it.");
-                }
+                Console.WriteLine($"All segments downloaded. Please check folder {tempDir.FullName}");
             }
             else
             {
-                throw new Exception($"Error occurred when merging files, the exit code is {mergeResult}");
+                var mergeResult = VideoMerger.MergeVideo(videoFile, audioFile, this.OutputFilename);
+                if (mergeResult == 0)
+                {
+                    File.Delete(videoFile);
+                    File.Delete(audioFile);
+                    try
+                    {
+                        tempDir.Delete();
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"Cannot delete temporary storage {tempDir.FullName}, you can manually remove it.");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Error occurred when merging files, the exit code is {mergeResult}");
+                }
             }
         }
 

@@ -12,6 +12,7 @@
         public int MergeVideo(string videoFile, string audioFile, string output)
         {
             var argument = string.Format(ArgumentTemplate, $"\"{videoFile}\"", $"\"{audioFile}\"", $"\"{output}\"");
+            Console.WriteLine($"Calling {CommandLine} with arguments: {argument}");
             using (var process = Process.Start(CommandLine, argument))
             {
                 if (process == null)
