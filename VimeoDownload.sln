@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VimeoDownload", "VimeoDownload\VimeoDownload.csproj", "{80A935E8-B962-4301-BD6D-6F8C76D1E943}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VimeoDownload.Wrapper.Core", "VimeoDownload.Wrapper.Core\VimeoDownload.Wrapper.Core.csproj", "{6E499594-83DF-42BC-9251-6B088103A446}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VimeoDownload.Wrapper.Core", "VimeoDownload.Wrapper.Core\VimeoDownload.Wrapper.Core.csproj", "{6E499594-83DF-42BC-9251-6B088103A446}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VimeoDownload.Wrapper.Windows", "VimeoDownload.Wrapper.Windows\VimeoDownload.Wrapper.Windows.csproj", "{F5B02804-E569-4815-85F6-00C49506849E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6E499594-83DF-42BC-9251-6B088103A446}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E499594-83DF-42BC-9251-6B088103A446}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E499594-83DF-42BC-9251-6B088103A446}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5B02804-E569-4815-85F6-00C49506849E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5B02804-E569-4815-85F6-00C49506849E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5B02804-E569-4815-85F6-00C49506849E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5B02804-E569-4815-85F6-00C49506849E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

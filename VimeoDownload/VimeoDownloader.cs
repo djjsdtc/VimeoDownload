@@ -124,7 +124,7 @@
             {
                 if (isBase64Init)
                 {
-                    Console.WriteLine($"Writing initialize segment into {outputFile}");
+                    Console.WriteLine($"Writing initialize segment into {Path.GetFileName(outputFile)}");
                     var initSegment = Convert.FromBase64String(clipData.InitSegment);
                     fileStream.Write(initSegment, 0, initSegment.Length);
                 }

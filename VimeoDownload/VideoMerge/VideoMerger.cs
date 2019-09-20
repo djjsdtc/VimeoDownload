@@ -13,7 +13,13 @@
         {
             var argument = string.Format(ArgumentTemplate, $"\"{videoFile}\"", $"\"{audioFile}\"", $"\"{output}\"");
             Console.WriteLine($"Calling {CommandLine} with arguments: {argument}");
-            using (var process = Process.Start(CommandLine, argument))
+            var processInfo = new ProcessStartInfo
+            {
+                FileName = this.CommandLine,
+                Arguments = argument,
+                UseShellExecute = false
+            };
+            using (var process = Process.Start(processInfo))
             {
                 if (process == null)
                 {
