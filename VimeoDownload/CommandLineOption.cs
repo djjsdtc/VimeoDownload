@@ -37,7 +37,7 @@
         [Option("merger",
             HelpText = "Define the video merger name. Supported values are 'ffmpeg' and 'mkvmerge'.\n" +
                        "If not defined or given a wrong value, ffmpeg will be used as the merger.",
-            Default = "ffmpeg")]
+            Default = "ffmpeg", MetaValue = "mergerName")]
         public string MergerName { get; set; }
 
         /// <summary>
@@ -52,7 +52,8 @@
         /// 输出文件名。默认为“output.mp4”。
         /// </summary>
         [Option('o', "output",
-            HelpText = "Define the output file name.", Default = "output.mp4")]
+            HelpText = "Define the output file name.", Default = "output.mp4",
+            MetaValue = "outputFile")]
         public string OutputFileName { get; set; }
 
         /// <summary>
@@ -80,7 +81,7 @@
         [Option("video",
             HelpText = "Define the video format id. The format id can be found from format list.\n" +
                        "If not defined or given a wrong value, the highest quality format will be downloaded.",
-            Required = false)]
+            Required = false, MetaValue = "videoId")]
         public string VideoFormatId { get; set; }
 
         /// <summary>
@@ -89,14 +90,15 @@
         [Option("audio",
             HelpText = "Define the audio format id. The format id can be found from format list.\n" +
                        "If not defined or given a wrong value, the highest quality format will be downloaded.",
-            Required = false)]
+            Required = false, MetaValue = "audioId")]
         public string AudioFormatId { get; set; }
 
         /// <summary>
         /// 同时下载的线程数，默认为 4。
         /// </summary>
         [Option('t', "threads",
-            HelpText = "Define the download thread's number.", Default = 4)]
+            HelpText = "Define the download thread's number.", Default = 4,
+            MetaValue = "threadNum")]
         public int ThreadNumber { get; set; }
 
         /// <summary>
@@ -109,7 +111,7 @@
                        "Currently supported proxy types are 'http' and 'socks'(SOCKS v5).\n" +
                        "If not defined or use 'system', the environment variable or system setting will be applied.\n" +
                        "If 'none' is defined, the system proxy will be bypassed.",
-            Default = "system")]
+            Default = "system", MetaValue = "proxy")]
         public string Proxy { get; set; }
     }
 }
