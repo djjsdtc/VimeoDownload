@@ -24,6 +24,8 @@
                     if (option.Download)
                     {
                         vimeoDownloader.OutputFilename = option.OutputFileName;
+                        vimeoDownloader.AudioFormatId = option.AudioFormatId;
+                        vimeoDownloader.VideoFormatId = option.VideoFormatId;
                         vimeoDownloader.VideoMerger = new MkvMergeVideoMerger();
                         await vimeoDownloader.DownloadVideo();
                     }
@@ -34,11 +36,11 @@
                 }
                 catch (AggregateException e)
                 {
-                    Console.WriteLine("Error: {0}", e.InnerException.Message);
+                    Console.WriteLine("Error: {0}", e.InnerException);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error: {0}", e.Message);
+                    Console.WriteLine("Error: {0}", e);
                 }
             }
         }

@@ -16,8 +16,7 @@
             {
                 if (process == null)
                 {
-                    throw new Exception(
-                        $"Could not launch {CommandLine}, make sure this program is in your PATH environment variable.");
+                    throw new Exception($"Could not launch {CommandLine}, make sure this program is in your PATH environment variable.");
                 }
                 process.WaitForExit();
                 return process.ExitCode;
