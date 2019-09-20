@@ -7,6 +7,7 @@
     using CommandLine;
     using MihaZupan;
     using VimeoDownload.VideoMerge;
+    using VimeoDownload.Web;
 
     public static class ProgramEntrance
     {

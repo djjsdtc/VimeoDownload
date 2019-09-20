@@ -1,12 +1,12 @@
-﻿namespace VimeoDownload
+﻿namespace VimeoDownload.Web
 {
+    using Flurl;
+    using Newtonsoft.Json;
     using System;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Flurl;
-    using Newtonsoft.Json;
     using VimeoDownload.DataContract;
 
     public static class WebUtility

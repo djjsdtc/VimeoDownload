@@ -1,4 +1,4 @@
-﻿namespace VimeoDownload
+﻿namespace VimeoDownload.Web
 {
     using System;
     using System.IO;
@@ -26,7 +26,7 @@
 
         public int ThreadNumber { get; set; }
 
-        private HttpClient httpClient;
+        private readonly HttpClient httpClient;
 
         public VimeoDownloader(HttpClientHandler httpClientHandler)
         {

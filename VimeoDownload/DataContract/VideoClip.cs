@@ -1,6 +1,4 @@
-﻿
-
-namespace VimeoDownload.DataContract
+﻿namespace VimeoDownload.DataContract
 {
     using Newtonsoft.Json;
 
