@@ -20,22 +20,11 @@
             {
                 Console.WriteLine("Downloading metadata...");
                 var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
-                Console.WriteLine($"The video has {videoInfo.Video.Count} video clip(s) and {videoInfo.Audio.Count} audio clip(s).");
                 var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
                 Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
                 var baseUrl = WebUtility.CombimeUrl(this.DownloadAddress, videoInfo.BaseUrl);
-                Parallel.For(0, videoInfo.Video.Count,
-                    new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                    i =>
-                    {
-                        DownloadMediaClip(httpClient, videoInfo.Video[i], baseUrl, Path.Combine(tempDir.FullName, $"video{i}.m4v"), videoInfo.IsBase64Init).Wait();
-                    });
-                Parallel.For(0, videoInfo.Audio.Count,
-                    new ParallelOptions { MaxDegreeOfParallelism = 1 },
-                    i =>
-                    {
-                        DownloadMediaClip(httpClient, videoInfo.Audio[i], baseUrl, Path.Combine(tempDir.FullName, $"audio{i}.m4a"), videoInfo.IsBase64Init).Wait();
-                    });
+                await DownloadMediaClip(httpClient, videoInfo.Video.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v"), videoInfo.IsBase64Init);
+                await DownloadMediaClip(httpClient, videoInfo.Audio.First(), baseUrl, Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a"), videoInfo.IsBase64Init);
             }
         }
 
@@ -56,12 +45,34 @@
                     await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream);
                 }
 
+                var tempPath = Path.Combine(Path.GetTempPath(), $"{clipData.Id}.{clipData.Codecs}");
+                var tempDirectory = Directory.CreateDirectory(tempPath);
+
+                Parallel.ForEach(clipData.Segments,
+                    new ParallelOptions{MaxDegreeOfParallelism = 4},
+                    segment =>
+                {
+                    using (var tempFile = File.Create(Path.Combine(tempDirectory.FullName, segment.Url)))
+                    {
+                        var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
+                        Console.WriteLine($"Downloading {url}");
+                        WebUtility.DownloadContentIntoStream(httpClient, url, tempFile).Wait();
+                    }
+                });
+
+                Console.WriteLine($"Combining all segments into {outputFile}");
                 foreach (var segment in clipData.Segments)
                 {
-                    var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
-                    Console.WriteLine($"Downloading {url}");
-                    await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream);
+                    var tempFileName = Path.Combine(tempDirectory.FullName, segment.Url);
+                    using (var tempFile = File.OpenRead(tempFileName))
+                    {
+                        tempFile.CopyTo(fileStream);
+                    }
+
+                    File.Delete(tempFileName);
                 }
+
+                tempDirectory.Delete();
             }
         }
     }

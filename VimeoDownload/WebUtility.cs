@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading.Tasks;
     using Flurl;
@@ -20,6 +21,8 @@
 
             var json = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
+            result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
+            result.Video = result.Video.OrderByDescending(x => x.Height).ToList();
             result.IsBase64Init = IsBase64InitSegment(url);
             return result;
         }
