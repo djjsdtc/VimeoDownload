@@ -37,19 +37,20 @@
         {
             Console.WriteLine("Downloading metadata...");
             var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
+            Console.WriteLine($"Video length: {TimeSpan.FromSeconds(videoInfo.Video[0].Duration).ToString()}");
             Console.WriteLine("Available video formats:");
-            Console.WriteLine("clip id\t\tcodec\tresolution\tframerate");
+            Console.WriteLine("{0,-15}{1,-8}{2,-15}{3}", "clip id", "codec", "resolution", "framerate");
             foreach (var video in videoInfo.Video)
             {
-                Console.WriteLine($"{video.Id}\t{video.Codecs.Split('.')[0]}\t{video.Width}x{video.Height}\t\t{video.Framerate:0.###}fps");
+                Console.WriteLine("{0,-15}{1,-8}{2,-15}{3}", video.Id, video.Codecs.Split('.')[0], $"{video.Width}x{video.Height}", $"{video.Framerate:0.###}fps");
             }
 
             Console.WriteLine();
             Console.WriteLine("Available audio formats:");
-            Console.WriteLine("clip id\t\tcodec\tbitrate");
+            Console.WriteLine("{0,-15}{1,-8}{2}", "clip id", "codec", "bitrate");
             foreach (var audio in videoInfo.Audio)
             {
-                Console.WriteLine($"{audio.Id}\t{audio.Codecs.Split('.')[0]}\t{audio.Bitrate}");
+                Console.WriteLine("{0,-15}{1,-8}{2}", audio.Id, audio.Codecs.Split('.')[0], $"{audio.Bitrate / 1000.0}kbps");
             }
         }
 
