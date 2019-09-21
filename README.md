@@ -34,7 +34,7 @@ VimeoDownload.exe -d --audio 1370478512 --merger mkvmerge --video 1370478523 "ht
  - 支持 .NET Core 2.2 的操作系统（详见 [.NET Core 2.2 - Supported OS versions](https://github.com/dotnet/core/blob/master/release-notes/2.2/2.2-supported-os.md)）
  - .NET Core 2.2 运行时
 
-无论使用哪种共有版本，如需使用音视频合并，则系统中至少应装有 `ffmpeg` 或 `mkvmerge` 其中之一，并确保程序所在的路径已添加到 `PATH` 环境变量中。
+无论使用哪种版本，如需使用音视频合并，则系统中至少应装有 `ffmpeg` 或 `mkvmerge` 其中之一，并确保程序所在的路径已添加到 `PATH` 环境变量中。
 
 验证方法：在任意目录下直接执行 `ffmpeg` 或 `mkvmerge`，如出现版本号则表示配置正确。
 
