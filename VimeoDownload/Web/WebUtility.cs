@@ -26,19 +26,26 @@
         {
             for (var i = 0; i < maxRetry; i++)
             {
-                var response = await httpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
-                    result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
-                    result.Video = result.Video.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList();
-                    result.IsBase64Init = IsBase64InitSegment(url);
-                    return result;
+                    var response = await httpClient.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
+                        result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
+                        result.Video = result.Video.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList();
+                        result.IsBase64Init = IsBase64InitSegment(url);
+                        return result;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    Console.WriteLine("Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                    Console.WriteLine($"Error occurred in download: {(e is AggregateException ? e.InnerException : e)}");
                 }
             }
 
@@ -57,15 +64,22 @@
         {
             for (var i = 0; i < maxRetry; i++)
             {
-                var response = await httpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    await response.Content.CopyToAsync(fileStream);
-                    return;
+                    var response = await httpClient.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await response.Content.CopyToAsync(fileStream);
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    Console.WriteLine("Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                    Console.WriteLine($"Error occurred in download: {(e is AggregateException ? e.InnerException : e)}");
                 }
             }
 

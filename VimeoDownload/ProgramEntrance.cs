@@ -27,13 +27,9 @@
                     .WithParsed(option => Run(option).Wait());
                 return 0;
             }
-            catch (AggregateException e)
-            {
-                Console.WriteLine("Error: {0}", e.InnerException);
-            }
             catch (Exception e)
             {
-                Console.WriteLine("Error: {0}", e);
+                Console.WriteLine($"Error: {(e is AggregateException ? e.InnerException : e)}");
             }
 
             return -1;
