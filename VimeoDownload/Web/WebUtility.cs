@@ -19,22 +19,30 @@
         /// </summary>
         /// <param name="httpClient">HTTP 客户端。</param>
         /// <param name="url">master.json 的文件地址。</param>
+        /// <param name="maxRetry">重试次数。</param>
         /// <returns>Vimeo 视频元数据。</returns>
         /// <exception cref="Exception">HTTP 请求出错时会抛出异常。</exception>
-        public static async Task<VimeoVideo> GetVideoInfo(HttpClient httpClient, string url)
+        public static async Task<VimeoVideo> GetVideoInfo(HttpClient httpClient, string url, int maxRetry)
         {
-            var response = await httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
+            for (var i = 0; i < maxRetry; i++)
             {
-                throw new Exception($"Request {url} gets error code {(int)response.StatusCode} ({response.StatusCode.ToString()})");
+                var response = await httpClient.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
+                    result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
+                    result.Video = result.Video.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList();
+                    result.IsBase64Init = IsBase64InitSegment(url);
+                    return result;
+                }
+                else
+                {
+                    Console.WriteLine("Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                }
             }
 
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
-            result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
-            result.Video = result.Video.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList();
-            result.IsBase64Init = IsBase64InitSegment(url);
-            return result;
+            throw new Exception("Max retry time exceeded when downloading metadata.");
         }
 
         /// <summary>
@@ -43,16 +51,25 @@
         /// <param name="httpClient">HTTP 客户端。</param>
         /// <param name="url">文件地址。</param>
         /// <param name="fileStream">输出文件流。</param>
+        /// <param name="maxRetry">重试次数。</param>
         /// <exception cref="Exception">HTTP 请求出错时会抛出异常。</exception>
-        public static async Task DownloadContentIntoStream(HttpClient httpClient, string url, FileStream fileStream)
+        public static async Task DownloadContentIntoStream(HttpClient httpClient, string url, FileStream fileStream, int maxRetry)
         {
-            var response = await httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
+            for (var i = 0; i < maxRetry; i++)
             {
-                throw new Exception($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                var response = await httpClient.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    await response.Content.CopyToAsync(fileStream);
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                }
             }
 
-            await response.Content.CopyToAsync(fileStream);
+            throw new Exception("Max retry time exceeded when downloading content.");
         }
 
         /// <summary>

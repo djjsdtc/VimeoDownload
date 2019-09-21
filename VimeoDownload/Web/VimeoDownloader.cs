@@ -55,6 +55,11 @@
         public int ThreadNumber { get; set; }
 
         /// <summary>
+        /// 最大重试次数。
+        /// </summary>
+        public int MaxRetry { get; set; }
+
+        /// <summary>
         /// HTTP 客户端。
         /// </summary>
         private readonly HttpClient httpClient;
@@ -63,9 +68,13 @@
         /// 构造函数。
         /// </summary>
         /// <param name="httpClientHandler">带代理设置的 <see cref="HttpClientHandler" />。</param>
-        public VimeoDownloader(HttpClientHandler httpClientHandler)
+        /// <param name="timeout">HTTP 请求超时时间。</param>
+        public VimeoDownloader(HttpClientHandler httpClientHandler, int timeout)
         {
-            this.httpClient = new HttpClient(httpClientHandler);
+            this.httpClient = new HttpClient(httpClientHandler)
+            {
+                Timeout = TimeSpan.FromSeconds(timeout)
+            };
         }
 
         /// <summary>
@@ -74,7 +83,7 @@
         public async Task ShowMediaInfo()
         {
             Console.WriteLine("Downloading metadata...");
-            var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
+            var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress, this.MaxRetry);
             Console.WriteLine($"Video length: {TimeSpan.FromSeconds(videoInfo.Video[0].Duration).ToString()}");
 
             Console.WriteLine("Available video formats:");
@@ -103,7 +112,7 @@
                 return;
             }
             Console.WriteLine("Downloading metadata...");
-            var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress);
+            var videoInfo = await WebUtility.GetVideoInfo(httpClient, this.DownloadAddress, this.MaxRetry);
 
             var tempDir = Directory.CreateDirectory(videoInfo.ClipId);
             Console.WriteLine($"Created directory {tempDir.FullName} to store temporary segments.");
@@ -192,7 +201,7 @@
                 {
                     var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, clipData.InitSegment);
                     Console.WriteLine($"Downloading {url}");
-                    await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream);
+                    await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream, this.MaxRetry);
                 }
 
                 // segments 存放在系统的临时文件夹中，且始终覆盖。
@@ -207,7 +216,7 @@
                     {
                         var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
                         Console.WriteLine($"Downloading {url}");
-                        WebUtility.DownloadContentIntoStream(httpClient, url, tempFile).Wait();
+                        WebUtility.DownloadContentIntoStream(httpClient, url, tempFile, this.MaxRetry).Wait();
                     }
                 });
 

@@ -116,5 +116,17 @@
                        "If 'none' is defined, the system proxy will be bypassed.",
             Default = "system", MetaValue = "proxy")]
         public string Proxy { get; set; }
+
+        /// <summary>
+        /// HTTP 请求超时时间。单位为秒，默认值为 60 秒。
+        /// </summary>
+        [Option("timeout", HelpText = "Define the HTTP request timeout in seconds.", Default = 60)]
+        public int Timeout { get; set; }
+
+        /// <summary>
+        /// 最大重试次数，默认为 3。
+        /// </summary>
+        [Option("retry", HelpText = "Define the maximum retry time when segment download fails.", Default = 3)]
+        public int MaxRetry { get; set; }
     }
 }

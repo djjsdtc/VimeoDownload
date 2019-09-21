@@ -15,17 +15,17 @@
     public static class ProgramEntrance
     {
         /// <summary>
-        /// 程序总入口。请注意虽然方法名为 Main，但本项目为 .NET Standard 项目，不能直接调用。
-        /// 需要从 .NET Core 或 .NET Framework 封装程序处调用该方法。
+        /// 程序总入口。
         /// </summary>
-        /// <typeparam name="T"><see cref="CommandLineOption" /> 的各平台重载。</typeparam>
         /// <param name="args">命令行参数。</param>
-        public static void Main(string[] args)
+        /// <returns>如果程序正确执行，返回 0。如果出错，返回 -1。</returns>
+        public static int Main(string[] args)
         {
             try
             {
                 Parser.Default.ParseArguments<CommandLineOption>(args)
                     .WithParsed(option => Run(option).Wait());
+                return 0;
             }
             catch (AggregateException e)
             {
@@ -35,6 +35,8 @@
             {
                 Console.WriteLine("Error: {0}", e);
             }
+
+            return -1;
         }
 
         /// <summary>
@@ -53,9 +55,20 @@
                 throw new Exception("One of '--download' and '--list-formats' must be defined.");
             }
 
-            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy)))
+            if(option.MaxRetry < 1)
+            {
+                throw new Exception("Invalid maximum retry time.");
+            }
+
+            if (option.Timeout < 1)
+            {
+                throw new Exception("Invalid timeout.");
+            }
+
+            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout))
             {
                 vimeoDownloader.DownloadAddress = option.DownloadAddress;
+                vimeoDownloader.MaxRetry = option.MaxRetry;
             
                 try
                 {
