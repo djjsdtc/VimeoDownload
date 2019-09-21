@@ -11,13 +11,11 @@
 ## 用法
 .NET Core 编译版本可跨平台使用，适用于 Windows、Linux 和 macOS。
 ``` dos
-dotnet ./VimeoDownload.dll --download
-  "https://skyfire.vimeocdn.com/test1/342688958/sep/video/test2/master.json?base64_init=1"
+dotnet ./VimeoDownload.dll --download "https://skyfire.vimeocdn.com/test1/342688958/sep/video/test2/master.json?base64_init=1"
 ```
 .NET Framework 编译版本仅可用于 Windows。
 ``` dos
-VimeoDownload.exe -d --audio 1370478512 --merger mkvmerge --video 1370478523
-  "https://skyfire.vimeocdn.com/test1/342688958/sep/video/test2/master.json?base64_init=1"
+VimeoDownload.exe -d --audio 1370478512 --merger mkvmerge --video 1370478523 "https://skyfire.vimeocdn.com/test1/342688958/sep/video/test2/master.json?base64_init=1"
 ```
 更多用法和示例，请参阅 `--help` 命令中的描述。（后续也会上线 wiki 来详细描述各个参数的使用）
 
