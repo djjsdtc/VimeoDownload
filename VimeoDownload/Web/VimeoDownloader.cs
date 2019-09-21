@@ -208,19 +208,20 @@
                 var tempPath = Path.Combine(Path.GetTempPath(), $"{clipData.Id}.{clipData.Codecs}");
                 var tempDirectory = Directory.CreateDirectory(tempPath);
 
-                Parallel.ForEach(clipData.Segments,
+                Parallel.For(0, clipData.Segments.Count,
                     new ParallelOptions { MaxDegreeOfParallelism = this.ThreadNumber },
-                    segment =>
+                    i =>
                 {
+                    var segment = clipData.Segments[i];
                     using (var tempFile = File.Create(Path.Combine(tempDirectory.FullName, segment.Url)))
                     {
                         var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
-                        Console.WriteLine($"Downloading {url}");
+                        Console.WriteLine($"Downloading segment {i + 1} of {clipData.Segments.Count}: {url}");
                         WebUtility.DownloadContentIntoStream(httpClient, url, tempFile, this.MaxRetry).Wait();
                     }
                 });
 
-                Console.WriteLine($"Combining all segments into {outputFile}");
+                Console.WriteLine($"Combining all segments into {Path.GetFileName(outputFile)}");
                 foreach (var segment in clipData.Segments)
                 {
                     var tempFileName = Path.Combine(tempDirectory.FullName, segment.Url);
