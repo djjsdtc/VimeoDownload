@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netstandard2.0;net461;netcoreapp2.2</TargetFrameworks>
+    <Authors>Cookie Studio</Authors>
+    <Copyright>Copyright (C) 2019 Cookie Studio. All rights reserved.</Copyright>
+    <Description></Description>
+    <AssemblyName>VimeoDownload</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,6 +14,7 @@
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="HttpToSocks5Proxy" Version="1.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
 </Project>

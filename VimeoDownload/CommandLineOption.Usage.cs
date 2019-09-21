@@ -14,7 +14,12 @@
         /// <summary>
         /// “Usage”示例。
         /// </summary>
-        protected static IEnumerable<Example> Examples
+#if NET461
+        [Usage(ApplicationAlias = "VimeoDownload.exe")]
+#elif NETCOREAPP2_2
+        [Usage(ApplicationAlias = "dotnet VimeoDownload.dll")]
+#endif
+        public static IEnumerable<Example> Examples
         {
             get
             {

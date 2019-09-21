@@ -20,11 +20,11 @@
         /// </summary>
         /// <typeparam name="T"><see cref="CommandLineOption" /> 的各平台重载。</typeparam>
         /// <param name="args">命令行参数。</param>
-        public static void Main<T>(string[] args) where T : CommandLineOption
+        public static void Main(string[] args)
         {
             try
             {
-                Parser.Default.ParseArguments<T>(args)
+                Parser.Default.ParseArguments<CommandLineOption>(args)
                     .WithParsed(option => Run(option).Wait());
             }
             catch (AggregateException e)
@@ -82,11 +82,7 @@
                 }
                 catch (AggregateException e)
                 {
-                    Console.WriteLine("Error: {0}", e.InnerException);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error: {0}", e);
+                    throw e.InnerException;
                 }
             }
         }
