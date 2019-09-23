@@ -94,5 +94,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VimeoDownload\VimeoDownload.csproj" AdditionalProperties="TargetFramework=netstandard2.0">
+      <Project>{80a935e8-b962-4301-bd6d-6f8c76d1e943}</Project>
+      <Name>VimeoDownload</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

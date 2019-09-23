@@ -20,6 +20,9 @@ namespace VimeoDownload.GUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 构造函数。
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
