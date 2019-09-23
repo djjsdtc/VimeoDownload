@@ -1,6 +1,7 @@
 ﻿namespace VimeoDownload
 {
     using CommandLine;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// 命令行选项。
@@ -13,6 +14,7 @@
         [Value(0, 
             HelpText = "The master.json metafile URL of the video to download.", 
             MetaName = "URL", Required = true)]
+        [JsonIgnore]
         public string DownloadAddress { get; set; }
 
         /// <summary>
@@ -22,6 +24,7 @@
             HelpText = "Download the Vimeo video.\n" +
                        "If this option is defined, '--list-formats' will be ignored.",
             Required = false)]
+        [JsonIgnore]
         public bool Download { get; set; }
 
         /// <summary>
@@ -32,6 +35,7 @@
             HelpText = "Keep temporary video and audio segments, do not merge into one media file.\n" +
                        "If this option is defined, '--output' and '--merger' will be ignored.",
             Required = false)]
+        [JsonProperty("no_merge")]
         public bool NoMerge { get; set; }
 
         /// <summary>
@@ -41,6 +45,7 @@
             HelpText = "Define the video merger name. Supported values are 'ffmpeg' and 'mkvmerge'.\n" +
                        "If not defined or given a wrong value, ffmpeg will be used as the merger.",
             Default = "ffmpeg", MetaValue = "mergerName")]
+        [JsonProperty("merger")]
         public string MergerName { get; set; }
 
         /// <summary>
@@ -49,6 +54,7 @@
         [Option('l', "list-formats",
             HelpText = "List all video and audio formats available for download.",
             Required = false)]
+        [JsonIgnore]
         public bool ListFormats { get; set; }
 
         /// <summary>
@@ -57,6 +63,7 @@
         [Option('o', "output",
             HelpText = "Define the output file name.", Default = "output.mp4",
             MetaValue = "outputFile")]
+        [JsonIgnore]
         public string OutputFileName { get; set; }
 
         /// <summary>
@@ -66,6 +73,7 @@
             HelpText = "Override the output and temporary file if exists.\n" +
                        "If this option is defined, '--no-override' will be ignored.",
             Required = false)]
+        [JsonIgnore]
         public bool OverrideOutput { get; set; }
 
         /// <summary>
@@ -76,6 +84,7 @@
             HelpText = "Do not override the output and temporary file if exists.\n" +
                        "If neither '--override' nor '--no-override' is defined and the output file exists, the program will ask if user would override the file or not.",
             Required = false)]
+        [JsonIgnore]
         public bool NotOverrideOutput { get; set; }
 
         /// <summary>
@@ -85,6 +94,7 @@
             HelpText = "Define the video format id. The format id can be found from format list.\n" +
                        "If not defined or given a wrong value, the highest quality format will be downloaded.",
             Required = false, MetaValue = "videoId")]
+        [JsonIgnore]
         public string VideoFormatId { get; set; }
 
         /// <summary>
@@ -94,6 +104,7 @@
             HelpText = "Define the audio format id. The format id can be found from format list.\n" +
                        "If not defined or given a wrong value, the highest quality format will be downloaded.",
             Required = false, MetaValue = "audioId")]
+        [JsonIgnore]
         public string AudioFormatId { get; set; }
 
         /// <summary>
@@ -102,7 +113,8 @@
         [Option('t', "threads",
             HelpText = "Define the download thread's number.", Default = 4,
             MetaValue = "threadNum")]
-        public int ThreadNumber { get; set; }
+        [JsonProperty("threads")]
+        public int ThreadNumber { get; set; } = 4;
 
         /// <summary>
         /// 代理服务器地址。格式为 URL 格式（如“socks://127.0.0.1:1080”）。
@@ -115,18 +127,21 @@
                        "If not defined or use 'system', the environment variable or system setting will be applied.\n" +
                        "If 'none' is defined, the system proxy will be bypassed.",
             Default = "system", MetaValue = "proxy")]
+        [JsonProperty("proxy")]
         public string Proxy { get; set; }
 
         /// <summary>
         /// HTTP 请求超时时间。单位为秒，默认值为 60 秒。
         /// </summary>
         [Option("timeout", HelpText = "Define the HTTP request timeout in seconds.", Default = 60)]
+        [JsonProperty("timeout")]
         public int Timeout { get; set; }
 
         /// <summary>
         /// 最大重试次数，默认为 3。
         /// </summary>
         [Option("retry", HelpText = "Define the maximum retry time when segment download fails.", Default = 3)]
+        [JsonProperty("retry")]
         public int MaxRetry { get; set; }
     }
 }
