@@ -43,10 +43,12 @@
         {
             if (appSettings.ContainsKey(key))
             {
-                appSettings.Settings.Remove(key);
+                appSettings.Settings[key].Value = value;
             }
-
-            appSettings.Settings.Add(key, value);
+            else
+            {
+                appSettings.Settings.Add(key, value);
+            }
         }
     }
 }
