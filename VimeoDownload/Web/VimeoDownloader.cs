@@ -64,6 +64,10 @@
         /// </summary>
         private readonly HttpClient httpClient;
 
+        /// <summary>
+        /// 交互式操作中询问用户是否覆盖已存在文件的方法。
+        /// 方法参数为要覆盖的文件名，返回结果为 <see langword="true" /> 则表示覆盖。
+        /// </summary>
         private readonly Func<string, bool> overridePromotion;
 
         /// <summary>
@@ -71,7 +75,7 @@
         /// </summary>
         /// <param name="httpClientHandler">带代理设置的 <see cref="HttpClientHandler" />。</param>
         /// <param name="timeout">HTTP 请求超时时间。</param>
-        /// <param name="overridePromotion"></param>
+        /// <param name="overridePromotion">交互式操作中询问用户是否覆盖已存在文件的方法。</param>
         public VimeoDownloader(HttpClientHandler httpClientHandler, int timeout, Func<string, bool> overridePromotion)
         {
             this.overridePromotion = overridePromotion;
@@ -82,7 +86,7 @@
         }
 
         /// <summary>
-        /// 显示音视频格式列表。
+        /// （仅命令行使用）显示音视频格式列表。
         /// </summary>
         public async Task ShowMediaInfo()
         {
@@ -245,6 +249,7 @@
         /// 确定是否应该创建新文件。如果文件不存在或文件存在且允许覆盖，则返回 <see langword="true" />。
         /// </summary>
         /// <param name="fileName">文件名。</param>
+        /// <param name="overridePromotion">交互式操作中询问用户是否覆盖已存在文件的方法。</param>
         /// <returns>如果允许创建新文件，则返回 <see langword="true" />。</returns>
         private bool ShouldCreateFile(string fileName, Func<string, bool> overridePromotion)
         {

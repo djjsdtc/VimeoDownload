@@ -89,8 +89,8 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock HorizontalAlignment="Right" Margin="0" TextWrapping="Wrap" Text="Video Format: " VerticalAlignment="Center"/>
                 <TextBlock HorizontalAlignment="Right" Margin="0" TextWrapping="Wrap" Text="Audio Format: " VerticalAlignment="Center" Grid.Row="1"/>
-                <ComboBox x:Name="OptVideoFormat" Grid.Column="1" Margin="10,0" VerticalContentAlignment="Center" VerticalAlignment="Center" IsEnabled="False" DisplayMemberPath="Description"/>
-                <ComboBox x:Name="OptAudioFormat" Grid.Column="1" Margin="10,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Grid.Row="1" IsEnabled="False" DisplayMemberPath="Description"/>
+                <ComboBox x:Name="OptVideoFormat" Grid.Column="1" Margin="10,0" VerticalContentAlignment="Center" VerticalAlignment="Center" DisplayMemberPath="Description"/>
+                <ComboBox x:Name="OptAudioFormat" Grid.Column="1" Margin="10,0" VerticalContentAlignment="Center" VerticalAlignment="Center" Grid.Row="1" DisplayMemberPath="Description"/>
             </Grid>
         </GroupBox>
     </Grid>

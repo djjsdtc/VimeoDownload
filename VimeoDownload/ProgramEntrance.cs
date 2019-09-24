@@ -15,7 +15,7 @@
     public static class ProgramEntrance
     {
         /// <summary>
-        /// 程序总入口。
+        /// （仅命令行使用）程序总入口。
         /// </summary>
         /// <param name="args">命令行参数。</param>
         /// <returns>如果程序正确执行，返回 0。如果出错，返回 -1。</returns>
@@ -39,7 +39,7 @@
         /// 执行程序。
         /// </summary>
         /// <param name="option">解析后的命令行参数。</param>
-        /// <param name="overridePromotion"></param>
+        /// <param name="overridePromotion">交互式操作中询问用户是否覆盖已存在文件的方法。</param>
         public static async Task Run(CommandLineOption option, Func<string, bool> overridePromotion)
         {
             if (option.ThreadNumber < 1)
@@ -167,6 +167,11 @@
             }
         }
 
+        /// <summary>
+        /// （仅命令行使用）命令行交互模式中询问是否覆盖文件，输入y表示覆盖，输入n表示不覆盖。
+        /// </summary>
+        /// <param name="fileName">（未使用）要覆盖的文件名。</param>
+        /// <returns>如返回 <see langword="true"/> 则表示覆盖。</returns>
         private static bool CommandLineOverridePromotion(string fileName)
         {
             Console.Write($"Override? (y/n): ");

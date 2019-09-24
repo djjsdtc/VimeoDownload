@@ -1,29 +1,22 @@
 ﻿namespace VimeoDownload.GUI
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Data;
-    using System.Windows.Documents;
-    using System.Windows.Input;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-    using System.Windows.Navigation;
-    using System.Windows.Shapes;
     using VimeoDownload.DataContract;
     using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
-    using Path = System.IO.Path;
 
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 当前正在进行下载的 URL。
+        /// </summary>
         private string currentUrl = string.Empty;
 
         /// <summary>
@@ -32,11 +25,16 @@
         public MainWindow()
         {
             InitializeComponent();
-            Console.SetOut(new ConsoleWriter(TxtOutput, Dispatcher));
+            var writer = new ConsoleWriter(TxtOutput, Dispatcher);
+            Console.SetOut(writer);
+            Console.SetError(writer);
             Console.WriteLine(BusinessLogic.GetVersionInfo());
             LoadConfiguration();
         }
 
+        /// <summary>
+        /// 从 app.config 文件中加载配置。
+        /// </summary>
         private void LoadConfiguration()
         {
             var config = BusinessLogic.GetSavedOptions();
@@ -85,6 +83,9 @@
             }
         }
 
+        /// <summary>
+        /// 代理设置选择“none”或“system”时禁用“http”和“socks”的输入框。
+        /// </summary>
         private void RtnSystemProxy_RtnNoProxy_Checked(object sender, RoutedEventArgs e)
         {
             TxtSocksHost.IsEnabled = false;
@@ -93,6 +94,9 @@
             TxtHttpPort.IsEnabled = false;
         }
 
+        /// <summary>
+        /// 代理设置选择“http”时禁用“socks”的输入框。
+        /// </summary>
         private void RtnHttpProxy_Checked(object sender, RoutedEventArgs e)
         {
             TxtSocksHost.IsEnabled = false;
@@ -101,6 +105,9 @@
             TxtHttpPort.IsEnabled = true;
         }
 
+        /// <summary>
+        /// 代理设置选择“socks”时禁用“http”的输入框。
+        /// </summary>
         private void RtnSocksProxy_Checked(object sender, RoutedEventArgs e)
         {
             TxtSocksHost.IsEnabled = true;
@@ -109,18 +116,29 @@
             TxtHttpPort.IsEnabled = false;
         }
 
+        /// <summary>
+        /// 勾选“merge”时允许指定 merger 和 output file。
+        /// </summary>
         private void ChkMerge_Checked(object sender, RoutedEventArgs e)
         {
             OptMergerName.IsEnabled = true;
             TxtOutputFile.IsEnabled = true;
+            BtnDownload.IsEnabled = IsBtnDownloadEnabled();
         }
 
+        /// <summary>
+        /// 取消勾选“merge”时禁止指定 merger 和 output file。
+        /// </summary>
         private void ChkMerge_Unchecked(object sender, RoutedEventArgs e)
         {
             OptMergerName.IsEnabled = false;
             TxtOutputFile.IsEnabled = false;
+            BtnDownload.IsEnabled = IsBtnDownloadEnabled();
         }
 
+        /// <summary>
+        /// 数字输入框禁止输入小于 1 的数字和非数字。（retry time 禁止小于 0）
+        /// </summary>
         private void NumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var textBox = sender as TextBox;
@@ -138,6 +156,10 @@
             }
         }
 
+        /// <summary>
+        /// 单击“save settings”按钮时保存设置到 app.config。
+        /// </summary>
+        /// <seealso cref="BusinessLogic.SaveOptions" />
         private void BtnSaveSettings_Click(object sender, RoutedEventArgs e)
         {
             var option = GetCurrentOption();
@@ -161,6 +183,10 @@
             }
         }
 
+        /// <summary>
+        /// 获取当前用户界面上的设置。
+        /// </summary>
+        /// <returns>当前设置。</returns>
         private CommandLineOption GetCurrentOption()
         {
             var option = new CommandLineOption
@@ -179,6 +205,10 @@
             return option;
         }
 
+        /// <summary>
+        /// 获取当前用户界面上的代理设置。
+        /// </summary>
+        /// <returns>当前代理设置。</returns>
         private string GetProxy()
         {
             var proxy = SettingsConst.ProxyTypeSystem;
@@ -198,6 +228,9 @@
             return proxy;
         }
 
+        /// <summary>
+        /// 单击“browse”按钮时弹出选择文件夹对话框选择保存文件的路径。
+        /// </summary>
         private void BtnBrowseDir_Click(object sender, RoutedEventArgs e)
         {
             using (var dialog = new FolderBrowserDialog())
@@ -215,6 +248,9 @@
             }
         }
 
+        /// <summary>
+        /// 单击“fetch”按钮时获取视频信息并在音视频格式选择框中填入对应项。
+        /// </summary>
         private void BtnFetch_Click(object sender, RoutedEventArgs e)
         {
             if (LockAndCheckProperties())
@@ -269,6 +305,10 @@
             }
         }
 
+        /// <summary>
+        /// 单击“fetch”或“download”按钮时检查设置是否正确，如正确则锁定所有输入项，准备进行网络操作。
+        /// </summary>
+        /// <returns>如设置正确且所有输入项已被锁定，返回 <see langword="true" />。</returns>
         private bool LockAndCheckProperties()
         {
             var message = string.Empty;
@@ -314,13 +354,16 @@
             return true;
         }
 
+        /// <summary>
+        /// 网络操作结束后解锁所有输入项。
+        /// </summary>
         private void UnlockProperties()
         {
             foreach (var grid in new[] { this.GrdMain, this.GrdFormats, this.GrdProxy })
             {
                 foreach (var uiElement in grid.Children)
                 {
-                    if (uiElement == BtnDownload || uiElement == OptAudioFormat || uiElement == OptVideoFormat)
+                    if (uiElement == BtnDownload)
                     {
                         (uiElement as Control).IsEnabled = IsBtnDownloadEnabled();
                         continue;
@@ -353,6 +396,9 @@
             }
         }
 
+        /// <summary>
+        /// “source”文本框和“output path”文本框内容改变时判断是否允许下载。
+        /// </summary>
         private void TxtSource_TxtOutputFile_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (BtnFetch != null && BtnDownload != null && TxtSource != null && TxtOutputFile != null &&
@@ -363,13 +409,26 @@
             }
         }
 
+        /// <summary>
+        /// 判断是否允许下载。
+        /// </summary>
+        /// <returns>如果允许下载，返回 <see langword="true" />。</returns>
         private bool IsBtnDownloadEnabled()
         {
+            /* 允许下载的条件：
+             * 1. source 文本框非空
+             * 2. source 文本框和当前地址一致（即已经点过 fetch 按钮）
+             * 3. 选择不进行 merge
+             * 4. 选择进行 merge 且 output file name 不为空
+             */
             return !string.IsNullOrWhiteSpace(this.currentUrl) &&
                    this.currentUrl == TxtSource.Text &&
                    (!ChkMerge.IsChecked.Value || !string.IsNullOrWhiteSpace(TxtOutputFile.Text));
         }
 
+        /// <summary>
+        /// 单击“download”按钮时开始下载过程。
+        /// </summary>
         private void BtnDownload_Click(object sender, RoutedEventArgs e)
         {
             if (LockAndCheckProperties())
@@ -405,6 +464,11 @@
             }
         }
 
+        /// <summary>
+        /// 弹出对话框询问是否覆盖文件，单击“Yes”表示覆盖，单击“No”表示不覆盖。
+        /// </summary>
+        /// <param name="fileName">要覆盖的文件名。</param>
+        /// <returns>如返回 <see langword="true"/> 则表示覆盖。</returns>
         private bool GUIOverridePromotion(string fileName)
         {
             var result = MessageBox.Show($"File {Path.GetFileName(fileName)} already exists. Override?",
