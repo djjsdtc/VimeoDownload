@@ -40,7 +40,7 @@
                     }
                     else
                     {
-                        Console.WriteLine($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                        Console.WriteLine($"Request {url} gets error code {(int)response.StatusCode} ({response.StatusCode.ToString()})");
                     }
                 }
                 catch (Exception e)
@@ -74,7 +74,7 @@
                     }
                     else
                     {
-                        Console.WriteLine($"Request {url} gets error code {response.StatusCode} ({response.StatusCode.ToString()})");
+                        Console.WriteLine($"Request {url} gets error code {(int)response.StatusCode} ({response.StatusCode.ToString()})");
                     }
                 }
                 catch (Exception e)
