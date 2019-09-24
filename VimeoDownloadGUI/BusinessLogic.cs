@@ -28,7 +28,9 @@
                 OutputPath = string.IsNullOrWhiteSpace(outputPath) ? Directory.GetCurrentDirectory() : outputPath,
                 ThreadNumber = int.TryParse(appSettings.Get(SettingsConst.ThreadNumber), out i) ? i : 4,
                 Timeout = int.TryParse(appSettings.Get(SettingsConst.Timeout), out i) ? i : 60,
-                Download = true
+                Download = true,
+                NotOverrideOutput = false,
+                OverrideOutput = false
             };
             return options;
         }
@@ -75,5 +77,8 @@
                 return WebUtility.GetVideoInfo(httpClient, url, maxRetry).Result;
             }
         }
+
+        public static void DownloadVideo(CommandLineOption option, Func<string, bool> overridePromotion)
+            => ProgramEntrance.Run(option, overridePromotion).Wait();
     }
 }

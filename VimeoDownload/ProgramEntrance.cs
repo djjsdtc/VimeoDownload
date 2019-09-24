@@ -24,7 +24,7 @@
             try
             {
                 Parser.Default.ParseArguments<CommandLineOption>(args)
-                    .WithParsed(option => Run(option).Wait());
+                    .WithParsed(option => Run(option, CommandLineOverridePromotion).Wait());
                 return 0;
             }
             catch (Exception e)
@@ -39,7 +39,8 @@
         /// 执行程序。
         /// </summary>
         /// <param name="option">解析后的命令行参数。</param>
-        public static async Task Run(CommandLineOption option)
+        /// <param name="overridePromotion"></param>
+        public static async Task Run(CommandLineOption option, Func<string, bool> overridePromotion)
         {
             if (option.ThreadNumber < 1)
             {
@@ -61,7 +62,7 @@
                 throw new Exception("Invalid timeout.");
             }
 
-            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout, CommandLineOverridePromotion))
+            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout, overridePromotion))
             {
                 vimeoDownloader.DownloadAddress = option.DownloadAddress;
                 vimeoDownloader.MaxRetry = option.MaxRetry;

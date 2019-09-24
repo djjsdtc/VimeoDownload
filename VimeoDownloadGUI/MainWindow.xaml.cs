@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -16,6 +17,7 @@
     using System.Windows.Shapes;
     using VimeoDownload.DataContract;
     using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
+    using Path = System.IO.Path;
 
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
@@ -137,16 +139,7 @@
 
         private void BtnSaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            var option = new CommandLineOption
-            {
-                MaxRetry = int.TryParse(TxtMaxRetry.Text, out var i) ? i : 3,
-                MergerName = OptMergerName.Text,
-                Proxy = GetProxy(),
-                NoMerge = !ChkMerge.IsChecked.Value,
-                OutputPath = TxtWorkingDir.Text,
-                ThreadNumber = int.TryParse(TxtThreadNum.Text, out i) ? i : 4,
-                Timeout = int.TryParse(TxtTimeout.Text, out i) ? i : 60
-            };
+            var option = GetCurrentOption();
 
             try
             {
@@ -165,6 +158,24 @@
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
+        }
+
+        private CommandLineOption GetCurrentOption()
+        {
+            var option = new CommandLineOption
+            {
+                MaxRetry = int.TryParse(TxtMaxRetry.Text, out var i) ? i : 3,
+                MergerName = OptMergerName.Text,
+                Proxy = GetProxy(),
+                NoMerge = !ChkMerge.IsChecked.Value,
+                OutputPath = TxtWorkingDir.Text,
+                ThreadNumber = int.TryParse(TxtThreadNum.Text, out i) ? i : 4,
+                Timeout = int.TryParse(TxtTimeout.Text, out i) ? i : 60,
+                Download = true,
+                NotOverrideOutput = false,
+                OverrideOutput = false
+            };
+            return option;
         }
 
         private string GetProxy()
@@ -356,6 +367,55 @@
             return !string.IsNullOrWhiteSpace(this.currentUrl) &&
                    this.currentUrl == TxtSource.Text &&
                    (!ChkMerge.IsChecked.Value || !string.IsNullOrWhiteSpace(TxtOutputFile.Text));
+        }
+
+        private void BtnDownload_Click(object sender, RoutedEventArgs e)
+        {
+            if (LockAndCheckProperties())
+            {
+                Directory.SetCurrentDirectory(TxtWorkingDir.Text);
+                var option = GetCurrentOption();
+                option.DownloadAddress = this.currentUrl;
+                option.OutputFileName = TxtOutputFile.Text;
+                option.VideoFormatId = (OptVideoFormat.SelectedItem as VideoClip).Id;
+                option.AudioFormatId = (OptAudioFormat.SelectedItem as AudioClip).Id;
+
+                Task.Run(() =>
+                {
+                    var message = string.Empty;
+                    try
+                    {
+                        BusinessLogic.DownloadVideo(option, GUIOverridePromotion);
+                    }
+                    catch (Exception ex)
+                    {
+                        message = (ex is AggregateException ? ex.InnerException : ex)?.Message;
+                    }
+
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        if (!string.IsNullOrEmpty(message))
+                        {
+                            MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        UnlockProperties();
+                    });
+                });
+            }
+        }
+
+        private bool GUIOverridePromotion(string fileName)
+        {
+            var result = MessageBox.Show($"File {Path.GetFileName(fileName)} already exists. Override?",
+                "File exists", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            { 
+                Console.WriteLine("The file will be overwritten.");
+                return true;
+            }
+
+            Console.WriteLine("The file will not be overwritten.");
+            return false;
         }
     }
 }
