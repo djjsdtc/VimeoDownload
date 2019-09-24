@@ -61,7 +61,7 @@
                 throw new Exception("Invalid timeout.");
             }
 
-            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout))
+            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout, CommandLineOverridePromotion))
             {
                 vimeoDownloader.DownloadAddress = option.DownloadAddress;
                 vimeoDownloader.MaxRetry = option.MaxRetry;
@@ -163,6 +163,26 @@
                 {
                     throw new Exception($"Invalid proxy setting {proxySetting}");
                 }
+            }
+        }
+
+        private static bool CommandLineOverridePromotion(string fileName)
+        {
+            Console.Write($"Override? (y/n): ");
+            while (true)
+            {
+                var result = Console.ReadKey().KeyChar;
+                Console.WriteLine();
+                if (result == 'Y' || result == 'y')
+                {
+                    return true;
+                }
+                else if (result == 'N' || result == 'n')
+                {
+                    return false;
+                }
+
+                Console.Write("Invalid response. Please enter 'y' or 'n': ");
             }
         }
     }

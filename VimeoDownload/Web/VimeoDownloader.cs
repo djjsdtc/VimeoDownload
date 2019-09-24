@@ -64,13 +64,17 @@
         /// </summary>
         private readonly HttpClient httpClient;
 
+        private readonly Func<string, bool> overridePromotion;
+
         /// <summary>
         /// 构造函数。
         /// </summary>
         /// <param name="httpClientHandler">带代理设置的 <see cref="HttpClientHandler" />。</param>
         /// <param name="timeout">HTTP 请求超时时间。</param>
-        public VimeoDownloader(HttpClientHandler httpClientHandler, int timeout)
+        /// <param name="overridePromotion"></param>
+        public VimeoDownloader(HttpClientHandler httpClientHandler, int timeout, Func<string, bool> overridePromotion)
         {
+            this.overridePromotion = overridePromotion;
             this.httpClient = new HttpClient(httpClientHandler)
             {
                 Timeout = TimeSpan.FromSeconds(timeout)
@@ -107,7 +111,7 @@
         /// </summary>
         public async Task DownloadVideo()
         {
-            if (VideoMerger != null && !ShouldCreateFile(OutputFilename))
+            if (VideoMerger != null && !ShouldCreateFile(OutputFilename, this.overridePromotion))
             {
                 return;
             }
@@ -121,7 +125,7 @@
 
             bool isVideoFileCreated = false;
             var videoFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4v");
-            if (ShouldCreateFile(videoFile))
+            if (ShouldCreateFile(videoFile, this.overridePromotion))
             {
                 isVideoFileCreated = true;
                 var video = videoInfo.Video.FirstOrDefault(x => string.Equals(x.Id, this.VideoFormatId));
@@ -136,7 +140,7 @@
 
             bool isAudioFileCreated = false;
             var audioFile = Path.Combine(tempDir.FullName, $"{videoInfo.ClipId}.m4a");
-            if (ShouldCreateFile(audioFile))
+            if (ShouldCreateFile(audioFile, this.overridePromotion))
             {
                 isAudioFileCreated = true;
                 var audio = videoInfo.Audio.FirstOrDefault(x => string.Equals(x.Id, this.AudioFormatId));
@@ -242,7 +246,7 @@
         /// </summary>
         /// <param name="fileName">文件名。</param>
         /// <returns>如果允许创建新文件，则返回 <see langword="true" />。</returns>
-        private bool ShouldCreateFile(string fileName)
+        private bool ShouldCreateFile(string fileName, Func<string, bool> overridePromotion)
         {
             if (File.Exists(fileName))
             {
@@ -259,22 +263,7 @@
                     return false;
                 }
 
-                Console.Write($"Override? (y/n): ");
-                while (true)
-                {
-                    var result = Console.ReadKey().KeyChar;
-                    Console.WriteLine();
-                    if (result == 'Y' || result == 'y')
-                    {
-                        return true;
-                    }
-                    else if (result == 'N' || result == 'n')
-                    {
-                        return false;
-                    }
-
-                    Console.Write("Invalid response. Please enter 'y' or 'n': ");
-                }
+                return overridePromotion(fileName);
             }
 
             return true;
