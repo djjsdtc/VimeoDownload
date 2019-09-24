@@ -24,7 +24,7 @@
         /// <exception cref="Exception">HTTP 请求出错时会抛出异常。</exception>
         public static async Task<VimeoVideo> GetVideoInfo(HttpClient httpClient, string url, int maxRetry)
         {
-            for (var i = 0; i < maxRetry; i++)
+            for (var i = 0; i < maxRetry + 1; i++)
             {
                 try
                 {
@@ -62,7 +62,7 @@
         /// <exception cref="Exception">HTTP 请求出错时会抛出异常。</exception>
         public static async Task DownloadContentIntoStream(HttpClient httpClient, string url, FileStream fileStream, int maxRetry)
         {
-            for (var i = 0; i < maxRetry; i++)
+            for (var i = 0; i < maxRetry + 1; i++)
             {
                 try
                 {

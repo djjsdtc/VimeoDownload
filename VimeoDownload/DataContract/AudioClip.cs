@@ -18,5 +18,8 @@
         /// </summary>
         [JsonProperty("sample_rate")]
         public int SampleRate { get; set; }
+
+        /// <inheritdoc />
+        public override string Description => $"{Id} ({Codecs.Split('.')[0]} {Bitrate / 1000.0}kbps)";
     }
 }

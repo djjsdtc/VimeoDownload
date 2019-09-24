@@ -73,5 +73,11 @@
         /// </summary>
         [JsonProperty("segments")]
         public IList<Segment> Segments { get; set; } = new List<Segment>();
+
+        /// <summary>
+        /// （仅GUI使用）显示该选项的文本。
+        /// </summary>
+        [JsonIgnore]
+        public abstract string Description { get; }
     }
 }

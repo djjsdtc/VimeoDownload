@@ -41,7 +41,7 @@
             HelpText = "Define the video merger name. Supported values are 'ffmpeg' and 'mkvmerge'.\n" +
                        "If not defined or given a wrong value, ffmpeg will be used as the merger.",
             Default = "ffmpeg", MetaValue = "mergerName")]
-        public string MergerName { get; set; }
+        public string MergerName { get; set; } = "ffmpeg";
 
         /// <summary>
         /// 如果为 <see langword="true" />，则进入显示音视频格式列表模式。
@@ -102,7 +102,7 @@
         [Option('t', "threads",
             HelpText = "Define the download thread's number.", Default = 4,
             MetaValue = "threadNum")]
-        public int ThreadNumber { get; set; }
+        public int ThreadNumber { get; set; } = 4;
 
         /// <summary>
         /// 代理服务器地址。格式为 URL 格式（如“socks://127.0.0.1:1080”）。
@@ -110,23 +110,29 @@
         /// 默认为“system”。
         /// </summary>
         [Option("proxy",
-            HelpText = "Define the proxy to be used for download. You can use 'none', 'system' or url formatted proxy definition.\n" +
-                       "Currently supported proxy types are 'http' and 'socks'(SOCKS v5).\n" +
-                       "If not defined or use 'system', the environment variable or system setting will be applied.\n" +
-                       "If 'none' is defined, the system proxy will be bypassed.",
+            HelpText =
+                "Define the proxy to be used for download. You can use 'none', 'system' or url formatted proxy definition.\n" +
+                "Currently supported proxy types are 'http' and 'socks'(SOCKS v5).\n" +
+                "If not defined or use 'system', the environment variable or system setting will be applied.\n" +
+                "If 'none' is defined, the system proxy will be bypassed.",
             Default = "system", MetaValue = "proxy")]
-        public string Proxy { get; set; }
+        public string Proxy { get; set; } = "system";
 
         /// <summary>
         /// HTTP 请求超时时间。单位为秒，默认值为 60 秒。
         /// </summary>
         [Option("timeout", HelpText = "Define the HTTP request timeout in seconds.", Default = 60)]
-        public int Timeout { get; set; }
+        public int Timeout { get; set; } = 60;
 
         /// <summary>
         /// 最大重试次数，默认为 3。
         /// </summary>
         [Option("retry", HelpText = "Define the maximum retry time when segment download fails.", Default = 3)]
-        public int MaxRetry { get; set; }
+        public int MaxRetry { get; set; } = 3;
+
+        /// <summary>
+        /// （仅GUI使用）生成文件的输出目录。
+        /// </summary>
+        public string OutputPath { get; set; }
     }
 }

@@ -24,7 +24,7 @@
             try
             {
                 Parser.Default.ParseArguments<CommandLineOption>(args)
-                    .WithParsed(option => Run(option).Wait());
+                    .WithParsed(option => Run(option, CommandLineOverridePromotion).Wait());
                 return 0;
             }
             catch (Exception e)
@@ -39,7 +39,8 @@
         /// 执行程序。
         /// </summary>
         /// <param name="option">解析后的命令行参数。</param>
-        public static async Task Run(CommandLineOption option)
+        /// <param name="overridePromotion"></param>
+        public static async Task Run(CommandLineOption option, Func<string, bool> overridePromotion)
         {
             if (option.ThreadNumber < 1)
             {
@@ -51,7 +52,7 @@
                 throw new Exception("One of '--download' and '--list-formats' must be defined.");
             }
 
-            if(option.MaxRetry < 1)
+            if(option.MaxRetry < 0)
             {
                 throw new Exception("Invalid maximum retry time.");
             }
@@ -61,7 +62,7 @@
                 throw new Exception("Invalid timeout.");
             }
 
-            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout))
+            using (var vimeoDownloader = new VimeoDownloader(GetProxyHandler(option.Proxy), option.Timeout, overridePromotion))
             {
                 vimeoDownloader.DownloadAddress = option.DownloadAddress;
                 vimeoDownloader.MaxRetry = option.MaxRetry;
@@ -163,6 +164,26 @@
                 {
                     throw new Exception($"Invalid proxy setting {proxySetting}");
                 }
+            }
+        }
+
+        private static bool CommandLineOverridePromotion(string fileName)
+        {
+            Console.Write($"Override? (y/n): ");
+            while (true)
+            {
+                var result = Console.ReadKey().KeyChar;
+                Console.WriteLine();
+                if (result == 'Y' || result == 'y')
+                {
+                    return true;
+                }
+                else if (result == 'N' || result == 'n')
+                {
+                    return false;
+                }
+
+                Console.Write("Invalid response. Please enter 'y' or 'n': ");
             }
         }
     }

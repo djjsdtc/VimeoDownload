@@ -24,5 +24,8 @@
         /// </summary>
         [JsonProperty("height")]
         public int Height { get; set; }
+
+        /// <inheritdoc />
+        public override string Description => $"{Id} ({Codecs.Split('.')[0]} {Width}x{Height}@{Framerate:0.###}fps)";
     }
 }
