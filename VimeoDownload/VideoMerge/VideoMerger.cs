@@ -1,6 +1,7 @@
 ﻿namespace VimeoDownload.VideoMerge
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
 
     /// <summary>
@@ -19,6 +20,11 @@
         protected abstract string CommandLine { get; }
 
         /// <summary>
+        /// 外部程序输出处理方法。输入为外部函数输出的字符串。
+        /// </summary>
+        public Action<string> HandleMergerOutput { get; set; }
+
+        /// <summary>
         /// 调用外部程序执行文件合并。
         /// </summary>
         /// <param name="videoFile">视频文件名。</param>
@@ -34,14 +40,34 @@
             {
                 FileName = this.CommandLine,
                 Arguments = argument,
-                UseShellExecute = false     // 置为 false 可使外部程序的控制台输出输出在本程序中。
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
             };
-            using (var process = Process.Start(processInfo))
+            using (var process = new Process { StartInfo = processInfo })
             {
-                if (process == null)
+                var stdoutHandler = new DataReceivedEventHandler((sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        HandleMergerOutput(e.Data);
+                    }
+                });
+                process.OutputDataReceived += stdoutHandler;
+                process.ErrorDataReceived += stdoutHandler;
+
+                try
+                {
+                    process.Start();
+                }
+                catch (Win32Exception)
                 {
                     throw new Exception($"Could not launch {CommandLine}, make sure this program is in your PATH environment variable.");
                 }
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
                 process.WaitForExit();
                 return process.ExitCode;
             }

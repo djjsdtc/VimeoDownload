@@ -81,6 +81,7 @@
                         if (!option.NoMerge)
                         {
                             vimeoDownloader.VideoMerger = GetVideoMerger(option.MergerName);
+                            vimeoDownloader.VideoMerger.HandleMergerOutput = Console.WriteLine;
                         }
 
                         await vimeoDownloader.DownloadVideo();
