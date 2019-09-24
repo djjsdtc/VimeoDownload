@@ -14,6 +14,7 @@
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
     using System.Windows.Shapes;
+    using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
@@ -158,6 +159,11 @@
             try
             {
                 BusinessLogic.SaveOptions(option);
+                MessageBox.Show(
+                    $"Settings saved into {BusinessLogic.GetConfigurationFilePath()}",
+                    "Save settings",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
             catch
             {
@@ -166,6 +172,23 @@
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnBrowseDir_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Choose the output path.";
+                var result = dialog.ShowDialog();
+
+                if (result == System.Windows.Forms.DialogResult.Cancel)
+                {
+                    return;
+                }
+
+                var workingDir = dialog.SelectedPath.Trim();
+                TxtWorkingDir.Text = workingDir;
             }
         }
     }
