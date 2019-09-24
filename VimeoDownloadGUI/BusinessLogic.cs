@@ -5,6 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Reflection;
     using VimeoDownload.DataContract;
     using VimeoDownload.Web;
 
@@ -80,5 +81,15 @@
 
         public static void DownloadVideo(CommandLineOption option, Func<string, bool> overridePromotion)
             => ProgramEntrance.Run(option, overridePromotion).Wait();
+
+        public static string GetVersionInfo()
+        {
+            var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly();
+            var name = assembly.GetName().Name;
+            var version = assembly.GetName().Version.ToString();
+            var copyright = assembly.GetCustomAttributes<AssemblyCopyrightAttribute>().FirstOrDefault()?.Copyright;
+
+            return $"{name} {version}{Environment.NewLine}{copyright}";
+        } 
     }
 }

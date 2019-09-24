@@ -33,6 +33,7 @@
         {
             InitializeComponent();
             Console.SetOut(new ConsoleWriter(TxtOutput, Dispatcher));
+            Console.WriteLine(BusinessLogic.GetVersionInfo());
             LoadConfiguration();
         }
 
@@ -251,7 +252,7 @@
                         }
                         else
                         {
-                            foreach(var mediaClip in vimeoVideo.Video)
+                            foreach (var mediaClip in vimeoVideo.Video)
                             {
                                 OptVideoFormat.Items.Add(mediaClip);
                             }
@@ -297,7 +298,7 @@
                 return false;
             }
 
-            foreach (var grid in new[] {this.GrdMain, this.GrdFormats, this.GrdProxy})
+            foreach (var grid in new[] { this.GrdMain, this.GrdFormats, this.GrdProxy })
             {
                 foreach (var uiElement in grid.Children)
                 {
@@ -409,7 +410,7 @@
             var result = MessageBox.Show($"File {Path.GetFileName(fileName)} already exists. Override?",
                 "File exists", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
-            { 
+            {
                 Console.WriteLine("The file will be overwritten.");
                 return true;
             }
