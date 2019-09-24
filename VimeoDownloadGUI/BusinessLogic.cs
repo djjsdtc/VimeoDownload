@@ -1,8 +1,12 @@
 ﻿namespace VimeoDownload.GUI
 {
+    using System;
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Net.Http;
+    using VimeoDownload.DataContract;
+    using VimeoDownload.Web;
 
     /// <summary>
     /// GUI 相关的业务逻辑。
@@ -14,15 +18,17 @@
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             var appSettings = config.AppSettings;
             var outputPath = appSettings.Get(SettingsConst.OutputPath);
+            var proxy = appSettings.Get(SettingsConst.Proxy);
             var options = new CommandLineOption
             {
                 MaxRetry = int.TryParse(appSettings.Get(SettingsConst.RetryTime), out var i) ? i : 3,
                 MergerName = GetValueOrDefault(appSettings.Get(SettingsConst.Merger), SettingsConst.MergerFFMpeg, SettingsConst.MergerMkvMerge),
-                Proxy = GetProxy(appSettings.Get(SettingsConst.Proxy)),
+                Proxy = IsValidProxy(proxy) ? proxy : SettingsConst.ProxyTypeSystem,
                 NoMerge = bool.TryParse(appSettings.Get(SettingsConst.MergeOutput), out var b) && !b,
                 OutputPath = string.IsNullOrWhiteSpace(outputPath) ? Directory.GetCurrentDirectory() : outputPath,
                 ThreadNumber = int.TryParse(appSettings.Get(SettingsConst.ThreadNumber), out i) ? i : 4,
-                Timeout = int.TryParse(appSettings.Get(SettingsConst.Timeout), out i) ? i : 60
+                Timeout = int.TryParse(appSettings.Get(SettingsConst.Timeout), out i) ? i : 60,
+                Download = true
             };
             return options;
         }
@@ -48,16 +54,25 @@
         private static string GetValueOrDefault(string originalValue, string defaultValue, params string[] otherValues)
             => originalValue == defaultValue || otherValues.Contains(originalValue) ? originalValue : defaultValue;
 
-        private static string GetProxy(string proxy)
+        public static bool IsValidProxy(string proxy)
         {
             try
             {
                 ProgramEntrance.GetProxyHandler(proxy);
-                return proxy;
+                return true;
             }
             catch
             {
-                return SettingsConst.ProxyTypeSystem;
+                return false;
+            }
+        }
+
+        public static VimeoVideo GetVideoInfo(string url, string proxy, int timeout, int maxRetry)
+        {
+            var proxyHandler = ProgramEntrance.GetProxyHandler(proxy);
+            using (var httpClient = new HttpClient(proxyHandler) { Timeout = TimeSpan.FromSeconds(timeout) })
+            {
+                return WebUtility.GetVideoInfo(httpClient, url, maxRetry).Result;
             }
         }
     }

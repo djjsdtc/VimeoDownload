@@ -51,7 +51,7 @@
                 throw new Exception("One of '--download' and '--list-formats' must be defined.");
             }
 
-            if(option.MaxRetry < 1)
+            if(option.MaxRetry < 0)
             {
                 throw new Exception("Invalid maximum retry time.");
             }
