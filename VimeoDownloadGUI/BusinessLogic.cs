@@ -13,18 +13,22 @@
         {
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             var appSettings = config.AppSettings;
+            var outputPath = appSettings.Get(SettingsConst.OutputPath);
             var options = new CommandLineOption
             {
                 MaxRetry = int.TryParse(appSettings.Get(SettingsConst.RetryTime), out var i) ? i : 3,
                 MergerName = GetValueOrDefault(appSettings.Get(SettingsConst.Merger), SettingsConst.MergerFFMpeg, SettingsConst.MergerMkvMerge),
                 Proxy = GetProxy(appSettings.Get(SettingsConst.Proxy)),
                 NoMerge = bool.TryParse(appSettings.Get(SettingsConst.MergeOutput), out var b) && !b,
-                OutputPath = appSettings.Get(SettingsConst.OutputPath) ?? Directory.GetCurrentDirectory(),
+                OutputPath = string.IsNullOrWhiteSpace(outputPath) ? Directory.GetCurrentDirectory() : outputPath,
                 ThreadNumber = int.TryParse(appSettings.Get(SettingsConst.ThreadNumber), out i) ? i : 4,
                 Timeout = int.TryParse(appSettings.Get(SettingsConst.Timeout), out i) ? i : 60
             };
             return options;
         }
+
+        public static string GetConfigurationFilePath()
+            => ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).FilePath;
 
         public static void SaveOptions(CommandLineOption option)
         {
@@ -34,10 +38,10 @@
             appSettings.AddOrUpdate(SettingsConst.MergeOutput, option.MergerName);
             appSettings.AddOrUpdate(SettingsConst.Proxy, option.Proxy);
             appSettings.AddOrUpdate(SettingsConst.MergeOutput, (!option.NoMerge).ToString());
-            appSettings.AddOrUpdate(SettingsConst.OutputPath, option.OutputPath.ToString());
+            appSettings.AddOrUpdate(SettingsConst.OutputPath, option.OutputPath);
             appSettings.AddOrUpdate(SettingsConst.ThreadNumber, option.ThreadNumber.ToString());
             appSettings.AddOrUpdate(SettingsConst.Timeout, option.Timeout.ToString());
-            config.Save(ConfigurationSaveMode.Full);
+            config.Save(ConfigurationSaveMode.Modified);
             ConfigurationManager.RefreshSection("appSettings");
         }
 

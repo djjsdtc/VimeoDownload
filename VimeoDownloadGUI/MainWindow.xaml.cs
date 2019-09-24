@@ -35,7 +35,7 @@
             TxtMaxRetry.Text = config.MaxRetry.ToString();
             TxtTimeout.Text = config.Timeout.ToString();
             TxtThreadNum.Text = config.ThreadNumber.ToString();
-            TxtWorkingDir.Text = config.OutputPath.ToString();
+            TxtWorkingDir.Text = config.OutputPath;
             ChkMerge.IsChecked = !config.NoMerge;
             switch (config.MergerName)
             {
@@ -111,6 +111,62 @@
         {
             OptMergerName.IsEnabled = false;
             TxtOutputFile.IsEnabled = false;
+        }
+
+        private void NumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            var change = e.Changes.First();
+            int offset = change.Offset;
+            if (change.AddedLength > 0)
+            {
+                if (!int.TryParse(textBox.Text, out var i) || i < 1)
+                {
+                    textBox.Text = textBox.Text.Remove(offset, change.AddedLength);
+                    textBox.Select(offset, 0);
+                }
+            }
+        }
+
+        private void BtnSaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var proxy = SettingsConst.ProxyTypeSystem;
+            if (RtnNoProxy.IsChecked ?? false)
+            {
+                proxy = SettingsConst.ProxyTypeNone;
+            }
+            else if (RtnHttpProxy.IsChecked ?? false)
+            {
+                proxy = $"{SettingsConst.ProxyTypeHttp}://{TxtHttpHost.Text}:{TxtHttpPort.Text}";
+            }
+            else if (RtnSocksProxy.IsChecked ?? false)
+            {
+                proxy = $"{SettingsConst.ProxyTypeSocks}://{TxtSocksHost.Text}:{TxtSocksPort.Text}";
+            }
+
+            var option = new CommandLineOption
+            {
+                MaxRetry = int.TryParse(TxtMaxRetry.Text, out var i) ? i : 3,
+                MergerName = OptMergerName.Text,
+                Proxy = proxy,
+                NoMerge = !ChkMerge.IsChecked ?? false,
+                OutputPath = TxtWorkingDir.Text,
+                ThreadNumber = int.TryParse(TxtThreadNum.Text, out i) ? i : 4,
+                Timeout = int.TryParse(TxtTimeout.Text, out i) ? i : 60
+            };
+
+            try
+            {
+                BusinessLogic.SaveOptions(option);
+            }
+            catch
+            {
+                MessageBox.Show(
+                    $"Cannot save your settings.\nPlease make sure you have the permission to change the file {BusinessLogic.GetConfigurationFilePath()}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 }

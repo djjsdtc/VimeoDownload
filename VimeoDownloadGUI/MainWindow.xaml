@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VimeoDownload.GUI"
+        xmlns:input="clr-namespace:System.Windows.Input;assembly=PresentationCore"
         mc:Ignorable="d"
         Title="VimeoDownloadGUI" Height="540" Width="960" ResizeMode="CanMinimize" Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}">
     <Grid ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="5">
@@ -45,7 +46,7 @@
             <ComboBoxItem Content="mkvmerge"/>
         </ComboBox>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="Thread number: " VerticalAlignment="Center"/>
-        <TextBox Grid.Column="4" Height="23" Margin="0,0,10,0" Grid.Row="2" VerticalAlignment="Center" Name="TxtThreadNum" VerticalContentAlignment="Center"/>
+        <TextBox Grid.Column="4" Height="23" Margin="0,0,10,0" Grid.Row="2" VerticalAlignment="Center" Name="TxtThreadNum" VerticalContentAlignment="Center"  input:InputMethod.IsInputMethodEnabled="false" TextChanged="NumberTextBox_TextChanged"/>
         <GroupBox Grid.Column="3" Header="Proxy" Margin="5,0,10,5" Grid.Row="3" Grid.RowSpan="5" Grid.ColumnSpan="2">
             <Grid Margin="0">
                 <Grid.RowDefinitions>
@@ -68,14 +69,14 @@
                 <TextBox Grid.Column="1" Height="24" Margin="0" Grid.Row="3" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="TxtSocksHost"/>
                 <TextBlock Grid.Column="2" Margin="0" Grid.Row="2" TextWrapping="Wrap" Text=":" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Column="2" Margin="0" Grid.Row="3" TextWrapping="Wrap" Text=":" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                <TextBox Grid.Column="3" Height="22" Margin="0" Grid.Row="2" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="TxtHttpPort"/>
-                <TextBox Grid.Column="3" Height="22" Margin="0" Grid.Row="3" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="TxtSocksPort"/>
+                <TextBox Grid.Column="3" Height="22" Margin="0" Grid.Row="2" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="TxtHttpPort"  input:InputMethod.IsInputMethodEnabled="False" TextChanged="NumberTextBox_TextChanged"/>
+                <TextBox Grid.Column="3" Height="22" Margin="0" Grid.Row="3" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="TxtSocksPort" input:InputMethod.IsInputMethodEnabled="False" TextChanged="NumberTextBox_TextChanged"/>
             </Grid>
         </GroupBox>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="8" TextWrapping="Wrap" Text="Timeout (sec): " VerticalAlignment="Center"/>
         <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="9" TextWrapping="Wrap" Text="Retry time: " VerticalAlignment="Center"/>
-        <TextBox Grid.Column="4" Height="23" Margin="0,0,10,0" Grid.Row="8" VerticalAlignment="Center" Name="TxtTimeout" VerticalContentAlignment="Center"/>
-        <TextBox Grid.Column="4" Height="23" Margin="0,0,10,0" Grid.Row="9" VerticalAlignment="Center" Name="TxtMaxRetry" VerticalContentAlignment="Center"/>
-        <Button Content="Save settings" Grid.Column="3" HorizontalAlignment="Right" Margin="51,10,10,0" Grid.Row="10" VerticalAlignment="Top" Width="90" Grid.ColumnSpan="2"/>
+        <TextBox Grid.Column="4" Height="23" Margin="0,0,10,0" Grid.Row="8" VerticalAlignment="Center" Name="TxtTimeout" VerticalContentAlignment="Center" input:InputMethod.IsInputMethodEnabled="False" TextChanged="NumberTextBox_TextChanged"/>
+        <TextBox Grid.Column="4" Height="23" Margin="0,0,10,0" Grid.Row="9" VerticalAlignment="Center" Name="TxtMaxRetry" VerticalContentAlignment="Center" input:InputMethod.IsInputMethodEnabled="False" TextChanged="NumberTextBox_TextChanged"/>
+        <Button Name="BtnSaveSettings" Content="Save settings" Grid.Column="3" HorizontalAlignment="Right" Margin="51,10,10,0" Grid.Row="10" VerticalAlignment="Top" Width="90" Grid.ColumnSpan="2" Click="BtnSaveSettings_Click"/>
     </Grid>
 </Window>
