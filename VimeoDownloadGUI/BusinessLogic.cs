@@ -60,7 +60,7 @@
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             var appSettings = config.AppSettings;
             appSettings.AddOrUpdate(SettingsConst.RetryTime, option.MaxRetry.ToString());
-            appSettings.AddOrUpdate(SettingsConst.MergeOutput, option.MergerName);
+            appSettings.AddOrUpdate(SettingsConst.Merger, option.MergerName);
             appSettings.AddOrUpdate(SettingsConst.Proxy, option.Proxy);
             appSettings.AddOrUpdate(SettingsConst.MergeOutput, (!option.NoMerge).ToString());
             appSettings.AddOrUpdate(SettingsConst.OutputPath, option.OutputPath);
