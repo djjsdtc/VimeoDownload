@@ -121,13 +121,15 @@
         /// <summary>
         /// HTTP 请求超时时间。单位为秒，默认值为 60 秒。
         /// </summary>
-        [Option("timeout", HelpText = "Define the HTTP request timeout in seconds.", Default = 60)]
+        [Option("timeout", HelpText = "Define the HTTP request timeout in seconds.",
+            Default = 60, MetaValue = "timeout")]
         public int Timeout { get; set; } = 60;
 
         /// <summary>
         /// 最大重试次数，默认为 3。
         /// </summary>
-        [Option("retry", HelpText = "Define the maximum retry time when segment download fails.", Default = 3)]
+        [Option("retry", HelpText = "Define the maximum retry time when segment download fails.",
+            Default = 3, MetaValue = "retryTime")]
         public int MaxRetry { get; set; } = 3;
 
         /// <summary>
