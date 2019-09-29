@@ -233,9 +233,12 @@
         /// </summary>
         private void BtnBrowseDir_Click(object sender, RoutedEventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            using (var dialog = new FolderBrowserDialog
             {
-                dialog.Description = "Choose the output path.";
+                Description = "Choose the output path.",
+                SelectedPath = TxtWorkingDir.Text
+            })
+            {
                 var result = dialog.ShowDialog();
 
                 if (result == System.Windows.Forms.DialogResult.Cancel)
