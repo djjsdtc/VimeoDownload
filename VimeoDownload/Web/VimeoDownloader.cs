@@ -212,36 +212,39 @@
                     await WebUtility.DownloadContentIntoStream(httpClient, url, fileStream, this.MaxRetry);
                 }
 
-                // segments 存放在系统的临时文件夹中，且始终覆盖。
-                var tempPath = Path.Combine(Path.GetTempPath(), $"{clipData.Id}.{clipData.Codecs}");
-                var tempDirectory = Directory.CreateDirectory(tempPath);
-
-                Parallel.For(0, clipData.Segments.Count,
-                    new ParallelOptions { MaxDegreeOfParallelism = this.ThreadNumber },
-                    i =>
+                if (clipData.Segments != null && clipData.Segments.Count > 0)
                 {
-                    var segment = clipData.Segments[i];
-                    using (var tempFile = File.Create(Path.Combine(tempDirectory.FullName, segment.Url)))
-                    {
-                        var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
-                        Console.WriteLine($"Downloading segment {i + 1} of {clipData.Segments.Count}: {url}");
-                        WebUtility.DownloadContentIntoStream(httpClient, url, tempFile, this.MaxRetry).Wait();
-                    }
-                });
+                    // segments 存放在系统的临时文件夹中，且始终覆盖。
+                    var tempPath = Path.Combine(Path.GetTempPath(), $"{clipData.Id}.{clipData.Codecs}");
+                    var tempDirectory = Directory.CreateDirectory(tempPath);
 
-                Console.WriteLine($"Combining all segments into {Path.GetFileName(outputFile)}");
-                foreach (var segment in clipData.Segments)
-                {
-                    var tempFileName = Path.Combine(tempDirectory.FullName, segment.Url);
-                    using (var tempFile = File.OpenRead(tempFileName))
+                    Parallel.For(0, clipData.Segments.Count,
+                        new ParallelOptions {MaxDegreeOfParallelism = this.ThreadNumber},
+                        i =>
+                        {
+                            var segment = clipData.Segments[i];
+                            using (var tempFile = File.Create(Path.Combine(tempDirectory.FullName, segment.Url)))
+                            {
+                                var url = WebUtility.CombimeUrl(baseUrl, clipData.BaseUrl, segment.Url);
+                                Console.WriteLine($"Downloading segment {i + 1} of {clipData.Segments.Count}: {url}");
+                                WebUtility.DownloadContentIntoStream(httpClient, url, tempFile, this.MaxRetry).Wait();
+                            }
+                        });
+
+                    Console.WriteLine($"Combining all segments into {Path.GetFileName(outputFile)}");
+                    foreach (var segment in clipData.Segments)
                     {
-                        tempFile.CopyTo(fileStream);
+                        var tempFileName = Path.Combine(tempDirectory.FullName, segment.Url);
+                        using (var tempFile = File.OpenRead(tempFileName))
+                        {
+                            tempFile.CopyTo(fileStream);
+                        }
+
+                        TryDelete(tempFileName);
                     }
 
-                    TryDelete(tempFileName);
+                    TryDelete(tempDirectory);
                 }
-
-                TryDelete(tempDirectory);
             }
         }
 

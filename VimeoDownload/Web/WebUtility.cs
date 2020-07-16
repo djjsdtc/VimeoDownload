@@ -3,6 +3,7 @@
     using Flurl;
     using Newtonsoft.Json;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Net.Http;
@@ -33,8 +34,8 @@
                     {
                         var json = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<VimeoVideo>(json);
-                        result.Audio = result.Audio.OrderByDescending(x => x.Bitrate).ToList();
-                        result.Video = result.Video.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList();
+                        result.Audio = result.Audio?.OrderByDescending(x => x.Bitrate).ToList() ?? new List<AudioClip>();
+                        result.Video = result.Video?.OrderByDescending(x => x.Height).ThenByDescending(x => x.Framerate).ToList() ?? new List<VideoClip>();
                         result.IsBase64Init = IsBase64InitSegment(url);
                         return result;
                     }
