@@ -14,7 +14,7 @@
     <PackageReference Include="CommandLineParser" Version="2.6.0" />
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="HttpToSocks5Proxy" Version="1.2.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
